@@ -19,11 +19,13 @@ from django.urls import include, path
 from django.http import HttpResponse
 
 from .views import main_spa
-from .views import login_view, logout_view, RegisterUserView
+from .views import login_view, logout_view, RegisterUserView, UserProfileView, HobbyListCreateView
 
 urlpatterns = [
     path('', main_spa),
     path('register/', RegisterUserView.as_view(), name='register'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
+    path('profile/', UserProfileView.as_view(), name='profile'),
+    path('hobbies/', HobbyListCreateView.as_view(), name='hobby-list'),
 ]

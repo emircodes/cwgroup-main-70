@@ -6,8 +6,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import generics
-from .models import User
-from .serializers import UserSerializer
+from .models import User, Hobby
+from .serializers import UserSerializer, HobbySerializer
 from rest_framework.permissions import AllowAny
 
 
@@ -40,8 +40,22 @@ from rest_framework import generics
 from .models import User
 from .serializers import UserSerializer
 from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 
 class RegisterUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user  
+    
+class HobbyListCreateView(generics.ListCreateAPIView):
+    queryset = Hobby.objects.all()
+    serializer_class = HobbySerializer
+    permission_classes = [IsAuthenticated]
