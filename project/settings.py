@@ -79,6 +79,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 
 # Database
 # https://docs.djangoproject.com/en/stable/ref/settings/#databases
@@ -87,6 +91,8 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': database.config()
 }
+
+AUTH_USER_MODEL = 'api.User'
 
 
 # Password validation
