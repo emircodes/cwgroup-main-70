@@ -24,4 +24,5 @@ urlpatterns = [
     path('health', lambda request: HttpResponse("OK")),
     path('admin/', admin.site.urls),
     path('api/users/', include('api.urls')),
+    path('api/', include('api.urls')),
 ]

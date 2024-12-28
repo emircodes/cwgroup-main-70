@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api',
+    'corsheaders',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -93,6 +95,17 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = 'api.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+}
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',  # Vue app running locally
+    'http://127.0.0.1:5173',  # Include both localhost and 127.0.0.1
+]
 
 
 # Password validation
