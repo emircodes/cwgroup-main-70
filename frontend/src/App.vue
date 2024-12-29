@@ -1,5 +1,7 @@
 <template>
+    
     <div class="gradient-bg">
+        <h1 class="page-title">HobbyVerse</h1>
         <div class="g1"></div>
         <div class="g2"></div>
         <div class="g3"></div>
@@ -8,27 +10,23 @@
         <RouterView class="flex-shrink-0" />
         
     </div>
-    <main class="container pt-4">
+    <!--<main class="container pt-4">
         <div>
-            {<!--<router-link
+            <router-link
                 class=""
                 :to="{name: 'Main Page'}"
             >
                 Main Page
-            </router-link> -->}
+            </router-link> 
             |
-            {<!--<router-link
+            <router-link
                 class=""
                 :to="{name: 'Other Page'}"
             >
                 Other Page
-            </router-link> -->}
-        </div>
-
-        
-        
-        <RouterView class="flex-shrink-0" />
-    </main>
+            </router-link>
+        </div>  
+    </main>-->
 </template>
 
 
@@ -56,6 +54,13 @@ html, body, #app, main {
     min-height: 100vh;  /* Ensure full height */
     min-width: 100vw;  /* Ensure full width */
     
+}
+
+.page-title {
+    font-size: 3rem;
+    color: white;
+    text-shadow: 1px 1px rgba(0,0,0,0.1);
+    padding: 1rem;
 }
 
 

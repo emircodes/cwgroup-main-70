@@ -1,7 +1,7 @@
 <template>
     <div class="login-container">
       <div class="login-box">
-        <h1>LOGIN</h1>
+        <h3>LOGIN</h3>
         <form @submit.prevent="login">
           <div class="input-group">
             <input v-model="email" type="email" placeholder="Email" required />
@@ -52,6 +52,7 @@ html, body {
     height: 100vh;  
 }
 
+
 /* Center the form while keeping the parent's background */
 .login-container {
     display: flex;
@@ -74,7 +75,7 @@ html, body {
     text-align: center;
     color: white;  
     margin: 0 auto;
-    
+
 }
 
 
