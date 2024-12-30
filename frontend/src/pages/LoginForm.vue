@@ -10,6 +10,7 @@
             <input v-model="password" type="password" placeholder="Password" required />
           </div>
           <button type="submit">LOGIN</button>
+          <h5 class="redirect-text">Don't have an account? <router-link to="/register">Register</router-link></h5>
         </form>
         <p v-if="error" class="error">{{ error }}</p>
       </div>
@@ -53,7 +54,7 @@ html, body {
 }
 
 
-/* Center the form while keeping the parent's background */
+
 .login-container {
     display: flex;
     justify-content: center;
@@ -61,21 +62,26 @@ html, body {
     height: 100vh;  
 }
 
-/* Glass effect for the login box */
+/* Glass effect */
 .login-box {
-    background: rgba(255, 255, 255, 0.2);  /* Increase opacity */
-    backdrop-filter: blur(20px);  /* Stronger blur for more separation */
+    background: rgba(255, 255, 255, 0.2);  
+    backdrop-filter: blur(20px); 
     -webkit-backdrop-filter: blur(20px);  
     border: 1px solid rgba(255, 255, 255, 0.4);  
     border-radius: 16px;
     padding: 3rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);  /* Slightly darker shadow */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); 
     width: 100%;
     max-width: 400px;
     text-align: center;
     color: white;  
     margin: 0 auto;
+    margin-bottom: 2.5rem;
 
+}
+
+.redirect-text {
+    margin-top: 1rem;
 }
 
 

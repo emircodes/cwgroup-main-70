@@ -7,12 +7,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'name', 'password')
         extra_kwargs = {
             'password': {'write_only': True},
-            'username': {'required': False}  # Make username optional
+            'username': {'required': False}  
         }
 
+     # Use email as username (reference: learnouts.com)
     def create(self, validated_data):
         if not validated_data.get('username'):
-            validated_data['username'] = validated_data['email']  # Use email as username
+            validated_data['username'] = validated_data['email'] 
         user = User.objects.create_user(**validated_data)
         return user
 

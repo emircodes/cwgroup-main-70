@@ -28,6 +28,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
+# Authenticate by email (reference: learnouts.com)
 @csrf_exempt
 def login_view(request):
     if request.method == 'POST':
@@ -35,7 +36,7 @@ def login_view(request):
         email = data.get('email')
         password = data.get('password')
         
-        user = authenticate(request, email=email, password=password)  # Authenticate by email
+        user = authenticate(request, email=email, password=password)  
         
         if user is not None:
             login(request, user)
@@ -61,10 +62,10 @@ class RegisterUserView(generics.CreateAPIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            print(serializer.errors)  # Print errors to the console
+            print(serializer.errors) 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(str(e))  # Print the exception to console
+            print(str(e))  
             return Response({"error": "Something went wrong on the server"}, status=500)
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
