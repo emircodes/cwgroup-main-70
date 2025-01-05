@@ -55,7 +55,7 @@
   };
   
   // Get CSRF token from cookies
-  function getCookie(name) {
+  function getCookie(name: string | any[]) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
       const cookies = document.cookie.split(';');

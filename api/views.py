@@ -1,60 +1,54 @@
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.shortcuts import render
-
 from django.contrib.auth import authenticate, login, logout
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
-from rest_framework import generics
+from django.contrib.auth.decorators import login_required
+from rest_framework import generics, status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 from .models import User, Hobby
 from .serializers import UserSerializer, HobbySerializer
-from rest_framework.permissions import AllowAny
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
+import json
+import logging
 
-from rest_framework.response import Response
+logger = logging.getLogger(__name__)
 
-
+# Main SPA View
+@login_required  # Automatically uses LOGIN_URL from settings.py
 def main_spa(request: HttpRequest) -> HttpResponse:
     return render(request, 'api/spa/index.html', {})
 
-from django.contrib.auth import authenticate, login, logout
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-
-from django.contrib.auth import authenticate, login
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-
-# Authenticate by email (reference: learnouts.com)
+# Login View
 @csrf_exempt
 def login_view(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        email = data.get('email')
-        password = data.get('password')
-        
-        user = authenticate(request, email=email, password=password)  
-        
-        if user is not None:
-            login(request, user)
-            return JsonResponse({'message': 'Login successful'})
-        else:
-            return JsonResponse({'error': 'Invalid credentials'}, status=400)
+        try:
+            data = json.loads(request.body)
+            email = data.get('email')
+            password = data.get('password')
 
+            user = authenticate(request, email=email, password=password)
 
+            if user:
+                login(request, user)
+                return JsonResponse({'message': 'Login successful'})
+            else:
+                return JsonResponse({'error': 'Invalid credentials'}, status=400)
+        except Exception as e:
+            logger.error(f"Login error: {e}")
+            return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
+
+# Logout View
 @csrf_exempt
 def logout_view(request):
     logout(request)
     return JsonResponse({'message': 'Logged out successfully'})
 
-
-
+# Register User View
 class RegisterUserView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [AllowAny]  # Registration should be open to everyone
 
     def create(self, request, *args, **kwargs):
         try:
@@ -62,20 +56,22 @@ class RegisterUserView(generics.CreateAPIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            print(serializer.errors) 
+            logger.error(f"Registration errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(str(e))  
-            return Response({"error": "Something went wrong on the server"}, status=500)
+            logger.error(f"Registration error: {e}")
+            return Response({"error": "Something went wrong on the server"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# User Profile View
 class UserProfileView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return self.request.user  
-    
+        return self.request.user  # Returns the authenticated user
+
+# Hobby List/Create View
 class HobbyListCreateView(generics.ListCreateAPIView):
     queryset = Hobby.objects.all()
     serializer_class = HobbySerializer

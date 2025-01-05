@@ -153,3 +153,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 INTERNAL_IPS = ['127.0.0.1']
+
+LOGIN_URL = '/login/'  # Redirect unauthenticated users to this URL
+LOGIN_REDIRECT_URL = '/'  # Redirect users here after successful login
+LOGOUT_REDIRECT_URL = '/login/'  # Redirect users here after logout
+
