@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from datetime import date
 
 # Create your models here.
 
@@ -42,6 +43,16 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+    
+    @property
+    def age(self):
+        if self.date_of_birth:
+            today = date.today()
+            return today.year - self.date_of_birth.year - (
+                (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
+            )
+        return None
+
 
 class Hobby(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -62,3 +73,12 @@ class FriendRequest(models.Model):
 
     def __str__(self):
         return f"{self.sender.email} -> {self.receiver.email} ({self.status})"
+    
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.user.username}: {self.message[:20]}"
