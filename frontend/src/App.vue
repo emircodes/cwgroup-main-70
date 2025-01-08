@@ -62,7 +62,6 @@ html, body, #app, main {
     text-shadow: 1px 1px rgba(0,0,0,0.1);
     padding: 1rem;
 }
-/*hi testing */
 
 
 
