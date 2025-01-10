@@ -10,16 +10,21 @@ from .models import User, Hobby
 from .serializers import UserSerializer, HobbySerializer
 import json
 import logging
+from django.middleware.csrf import get_token
+
 
 logger = logging.getLogger(__name__)
 
+def get_csrf_token(request):
+    token = get_token(request)
+    return JsonResponse({'token': token})
+
 # Main SPA View
-@login_required  # Automatically uses LOGIN_URL from settings.py
 def main_spa(request):
     return render(request, '/templates/api/spa/index.html')
 
 # Login View
-@csrf_exempt
+@csrf_protect
 def login_view(request):
     if request.method == 'POST':
         try:
@@ -31,6 +36,7 @@ def login_view(request):
 
             if user:
                 login(request, user)
+                
                 return JsonResponse({'message': 'Login successful'})
             else:
                 return JsonResponse({'error': 'Invalid credentials'}, status=400)

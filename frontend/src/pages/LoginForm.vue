@@ -21,19 +21,39 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useAuth } from '../stores/auth';
 const router = useRouter();
 
 const email = ref('');
 const password = ref('');
 const error = ref('');
+const token = ref('');
+const auth = useAuth();
+
+async function fetchToken() {
+  try {
+    const res = await axios.get('/api/get-token/');
+    token.value = res.data.token;
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 const login = async () => {
   try {
+    await fetchToken()
+    
+
     const response = await axios.post('/api/login/', {
       email: email.value,
       password: password.value
+    }, {
+      headers: {
+        'X-CSRFToken': token.value
+      }
     });
     localStorage.setItem('token', response.data.token);
+    auth.login();
     router.push('/profile');
   } catch (err) {
     error.value = 'Invalid credentials';

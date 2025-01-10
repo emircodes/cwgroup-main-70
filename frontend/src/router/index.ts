@@ -9,7 +9,7 @@ import OtherPage from '../pages/OtherPage.vue';
 import LoginForm from '../pages/LoginForm.vue';
 import RegisterForm from '../pages/RegisterForm.vue';
 import ProfileView from '../pages/ProfileView.vue';
-import { defineStore } from 'pinia';
+import {useAuth} from '../stores/auth.ts'
 
 let base = (import.meta.env.MODE == 'development') ? import.meta.env.BASE_URL : ''
 
@@ -37,21 +37,17 @@ const router = createRouter({
     ]
 })
 
-router.beforeEach((to, from) => {
-    const auth = defineStore('auth', {
-        isLoggedIn: false,
-        initialize() {
-            // Check if user is authenticated
-            // You can use your own logic here to check if the user is logged in
-            // For example, you can check if there is a token in local storage
-            this.isLoggedIn = localStorage.getItem('token')!== null;
-        }
-    })
+router.beforeEach((to, from, next) => {
+    const auth = useAuth()
+
     if(to.meta.requiresAuth && !auth.isLoggedIn) {
         return {
-            path: '/login',
-            query: { redirect: to.fullPath },
+            path: '/login/',
         }
+    }
+
+    else {
+        next();
     }
 })
 
