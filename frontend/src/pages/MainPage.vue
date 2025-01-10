@@ -4,12 +4,10 @@
   </div>
 
 
-  <LoginForm></LoginForm>
 </template>
 
 <script lang="ts">
     import { defineComponent } from "vue";
-    import LoginForm from "./LoginForm.vue";
 
     export default defineComponent({
         data() {

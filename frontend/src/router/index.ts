@@ -1,7 +1,6 @@
 // Example of how to use Vue Router
 
 import { createRouter, createWebHistory } from 'vue-router'
-
 // 1. Define route components.
 // These can be imported from other files
 import MainPage from '../pages/MainPage.vue';
@@ -10,8 +9,10 @@ import OtherPage from '../pages/OtherPage.vue';
 import LoginForm from '../pages/LoginForm.vue';
 import RegisterForm from '../pages/RegisterForm.vue';
 import ProfileView from '../pages/ProfileView.vue';
+import { defineStore } from 'pinia';
 
 let base = (import.meta.env.MODE == 'development') ? import.meta.env.BASE_URL : ''
+
 
 // 2. Define some routes
 // Each route should map to a component.
@@ -19,12 +20,39 @@ let base = (import.meta.env.MODE == 'development') ? import.meta.env.BASE_URL : 
 const router = createRouter({
     history: createWebHistory(base),
     routes: [
-        { path: '/', name: 'Main Page', component: MainPage },
+        { 
+            path: '/', name: 'Main Page', component: MainPage, meta: {requiresAuth: true,}
+        },
         { path: '/other/', name: 'Other Page', component: OtherPage },
         { path: '/login', component: LoginForm },
         { path: '/register', component: RegisterForm },
-        { path: '/profile', component: ProfileView }
+        { path: '/profile', component: ProfileView },
+
+        // Wildcard route to catch all routes not explicitly defined
+        { path: '/:pathMatch(.*)*', redirect: '/' },
+        {
+            path: '/:catchAll(.*)', // Handle all undefined routes
+            redirect: '/',
+        },
     ]
+})
+
+router.beforeEach((to, from) => {
+    const auth = defineStore('auth', {
+        isLoggedIn: false,
+        initialize() {
+            // Check if user is authenticated
+            // You can use your own logic here to check if the user is logged in
+            // For example, you can check if there is a token in local storage
+            this.isLoggedIn = localStorage.getItem('token')!== null;
+        }
+    })
+    if(to.meta.requiresAuth && !auth.isLoggedIn) {
+        return {
+            path: '/login',
+            query: { redirect: to.fullPath },
+        }
+    }
 })
 
 export default router

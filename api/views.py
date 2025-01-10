@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.decorators import login_required
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 # Main SPA View
 @login_required  # Automatically uses LOGIN_URL from settings.py
-def main_spa(request: HttpRequest) -> HttpResponse:
-    return render(request, 'api/spa/index.html', {})
+def main_spa(request):
+    return render(request, '/templates/api/spa/index.html')
 
 # Login View
 @csrf_exempt
@@ -39,10 +39,8 @@ def login_view(request):
             return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
 
 # Logout View
-@csrf_exempt
 def logout_view(request):
     logout(request)
-    return JsonResponse({'message': 'Logged out successfully'})
 
 # Register User View
 class RegisterUserView(generics.CreateAPIView):

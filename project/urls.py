@@ -22,6 +22,7 @@ from django.http import HttpResponse
 urlpatterns = [
     path('', include('api.urls')),
     path('health', lambda request: HttpResponse("OK")),
+    path("accounts/", include("django.contrib.auth.urls")),
     path('admin/', admin.site.urls),
     path('api/users/', include('api.urls')),
     path('api/', include('api.urls')),
