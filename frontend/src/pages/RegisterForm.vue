@@ -24,6 +24,7 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useAuth } from '../stores/auth';
 
 const router = useRouter();
 
@@ -31,14 +32,30 @@ const name = ref('');
 const email = ref('');
 const password = ref('');
 const error = ref('');
+const token = ref('');
+
+async function fetchToken() {
+  try {
+    const res = await axios.get('/api/get-token/');
+    token.value = res.data.token;
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 const register = async () => {
   try {
+    await fetchToken();
+
     await axios.post('/api/register/', {
       name: name.value,
       email: email.value,
       password: password.value
-    });
+    },{ 
+    headers: {
+      'X-CSRFToken': token.value,
+    }});
+    
     router.push('/login');
   } catch (err) {
     error.value = 'Registration failed';

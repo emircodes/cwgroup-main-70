@@ -20,6 +20,7 @@ def get_csrf_token(request):
     return JsonResponse({'token': token})
 
 # Main SPA View
+@login_required
 def main_spa(request):
     return render(request, '/templates/api/spa/index.html')
 
