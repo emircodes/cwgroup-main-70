@@ -1,8 +1,13 @@
 <template>
     <div class="profile">
       <h1>Profile</h1>
-      <form @submit.prevent="updateProfile">
-        <input v-model="name" type="text" placeholder="Name" required />
+      <form @submit="updateProfile">
+        <div>
+          <div>
+            <label for="name">Name:</label>
+          </div>
+          <input v-model="name" type="text" placeholder="Name" required />
+        </div>
         <input v-model="email" type="email" placeholder="Email" required />
         <input v-model="date_of_birth" type="date" />
         <button type="submit">Save</button>
