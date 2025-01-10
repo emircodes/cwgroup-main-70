@@ -54,7 +54,7 @@ const login = async () => {
     });
     localStorage.setItem('token', response.data.token);
     auth.login();
-    router.push('/profile');
+    router.push('/');
   } catch (err) {
     error.value = 'Invalid credentials';
   }
