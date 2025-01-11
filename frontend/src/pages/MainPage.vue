@@ -1,12 +1,10 @@
 <template>
-  <div class="h1">
-    {{ title }}
-  </div>
 
-  <div>
+
+  <div class="input-group">
     <ul class="nav nav-pills">
       <li class="nav-item">
-        <a class="nav-link active" aria-current="page" onclick="">My Profile</a>
+        <a class="nav-link active" aria-current="page" @click="goToProfile" >My Profile</a>
       </li>
 
       <li class="nav-item">
@@ -16,17 +14,16 @@
   </div>
 </template>
 
-<script lang="ts">
-    import { defineComponent } from "vue";
+<script setup lang="ts">
+    import { useRouter } from "vue-router";
 
-    export default defineComponent({
-        data() {
-            return {
-                title: "hi Page",
-            }
-        }
-    })
+    const router = useRouter();
+
+    const goToProfile = () => {
+        router.push("/profile");
+    }
+
 </script>
 
-<style scoped>
+<style >
 </style>

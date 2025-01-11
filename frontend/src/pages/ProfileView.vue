@@ -42,22 +42,13 @@
   const error = ref('');
 
 
-  const formatDate = (date: string | null): string | null => {
-    if (!date) return null;
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return null; // Handle invalid dates
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
   // Fetch user profile on mount
   onMounted(async () => {
     try {
       const response = await axios.get('/api/profile/', { withCredentials: true });
       name.value = response.data.name;
       email.value = response.data.email;
-      date_of_birth.value = formatDate(response.data.date_of_birth);
+      date_of_birth.value = (response.data.date_of_birth);
       console.log(response.data)
     } catch (err) {
       error.value = 'Failed to load profile';

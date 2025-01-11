@@ -26,7 +26,7 @@ const router = createRouter({
         { path: '/other/', name: 'Other Page', component: OtherPage },
         { path: '/login', component: LoginForm },
         { path: '/register', component: RegisterForm },
-        { path: '/profile', component: ProfileView },
+        { path: '/profile', component: ProfileView, meta: {requiresAuth: true,}},
 
         // Wildcard route to catch all routes not explicitly defined
         { path: '/:pathMatch(.*)*', redirect: '/' },
