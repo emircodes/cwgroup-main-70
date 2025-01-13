@@ -11,11 +11,15 @@
         <a class="nav-link" href="#">Link</a>
       </li>
     </ul>
+    <!-- User List -->
+    <UserList />
+
   </div>
 </template>
 
 <script setup lang="ts">
     import { useRouter } from "vue-router";
+    import UserList from "./UserList.vue"
 
     const router = useRouter();
 
@@ -26,4 +30,7 @@
 </script>
 
 <style >
+.nav {
+  margin-bottom: 20px;
+}
 </style>

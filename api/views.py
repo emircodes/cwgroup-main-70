@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.decorators import login_required
 from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from .models import User, Hobby
@@ -22,7 +23,7 @@ def get_csrf_token(request):
 # Main SPA View
 @login_required
 def main_spa(request):
-    return render(request, '/templates/api/spa/index.html')
+    return render(request, '/api/spa/index.html')
 
 # Login View
 @csrf_protect
@@ -81,3 +82,11 @@ class HobbyListCreateView(generics.ListCreateAPIView):
     queryset = Hobby.objects.all()
     serializer_class = HobbySerializer
     permission_classes = [IsAuthenticated]
+
+class AllUsersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        users = User.objects.all()  # Fetch all users
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)

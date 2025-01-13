@@ -10,6 +10,7 @@ from .views import (
     RegisterUserView,
     UserProfileView,
     HobbyListCreateView,
+    AllUsersView,
     get_csrf_token
 )
 
@@ -22,5 +23,6 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),  # Using Django's built-in logout view
     path('profile/', login_required(UserProfileView.as_view()), name='profile'),  # Securing profile route
     path('hobbies/', login_required(HobbyListCreateView.as_view()), name='hobby-list'),  # Securing hobbies route
+    path('api/users/', AllUsersView.as_view(), name='all-users'),
     path('get-token/', get_csrf_token, name='getToken')
 ]
