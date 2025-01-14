@@ -42,14 +42,14 @@
           <button class="btn btn-outline-secondary" type="submit">Add Hobby</button>
           <select class="form-select" id="inputGroupSelect03" aria-label="select hobby with button">
             <option selected>Choose...</option>
-            <option v-for="item in selectHobbies" :key="hobby" >{{ item.name }}</option>
+            <option v-for="item in selectHobbies" :key="hobby" >{{ item }}</option>
           </select>
         </div>
 
         <div class="card">
           <h1>My Hobbies</h1>
           <ul class="list-group">
-            <li class="list-group-item" v-for="item in personalHobbies" >{{ item.name }}</li>
+            <li class="list-group-item" v-for="item in personalHobbies" >{{ item }}</li>
           </ul>
         </div>
       </div>
@@ -69,36 +69,14 @@
   const email = ref('');
   const date_of_birth = ref<string | null>(null);
   const message = ref('');
-  const personalHobbies = ref<{id: number, name:string}[]>([]); 
-  const repositoryHobbies = ref<{id: number; name: string;}[]>([]);
-  let selectHobbies = ref<{id: number; name: string;}[]>([]);
+  const personalHobbies = ref([]); 
+  const repositoryHobbies = ref([]);
+  let selectHobbies = ref([]);
   const hobby = ref('');
   const error = ref('');
 
 
-  function addHobbiesText() {
-    if (!hobby.value.trim()) {
-      error.value = 'Hobby cannot be empty.';
-      return; // Stop execution if the input is empty
-    }
-    // Add new hobby to the personal hobbies array
 
-    personalHobbies.value.push({ id: 10 ,  name: hobby.value });
-
-    selectHobbies.value = selectHobbies.value.filter((item) => item.name!== hobby.value);    
-    error.value = '';
-  }
-  
-  // Function for Selecting Hobbies
-  function selectHobby(
-    personalHobbies: { id: number; name: string }[],
-    repositoryHobbies: { id: number; name: string }[]
-  ) {
-    const filteredHobbies = repositoryHobbies.filter(
-      (repoHobby) => !personalHobbies.some((personalHobby) => personalHobby.name === repoHobby.name)
-    );
-    selectHobbies.value = filteredHobbies;
-  }
 
   // Fetch user profile on mount
   onMounted(async () => {
@@ -115,7 +93,6 @@
       console.log(response.data)
       console.log(response.data.hobbies);
       
-      selectHobby(personalHobbies.value, repositoryHobbies.value);
     } catch (err) {
       error.value = 'Failed to load profile';
     }
@@ -123,6 +100,12 @@
 
   });
   
+  function selectHobby(){
+    console.log(personalHobbies);
+    console.log(repositoryHobbies);
+    selectHobbies.value = [];
+    console.log(selectHobbies);
+  }
   // Update profile
   const updateProfile = async () => {
     try {
@@ -131,7 +114,6 @@
         name: name.value,
         email: email.value,
         date_of_birth: date_of_birth.value,
-        hobbies: personalHobbies.value,
       }, {
         headers: {
           'X-CSRFToken': csrftoken  // Attach CSRF token
@@ -147,7 +129,6 @@
   // updates hobby
   const updateHobbyTextToHobbyApi = async () => {
     try {
-      addHobbiesText();
       console.log(personalHobbies.value);
       
       const csrftoken = getCookie('csrftoken');  // Get CSRF token
@@ -167,15 +148,11 @@
   };
 
   const updateHobbyTextToUserApi = async () => {
-    await updateHobbyTextToHobbyApi();
     try {
-      const payload = { hobbies: personalHobbies.value };  // Sending only IDs
-      console.log("Payload to send:", payload);
-
-      console.log(personalHobbies.value);
-      
       const csrftoken = getCookie('csrftoken');  // Get CSRF token
-      await axios.patch('/api/profile/', payload, {
+      await axios.patch('/api/profile/', {
+        hobbies: [1,2],
+      }, {
         headers: {
           'X-CSRFToken': csrftoken  // Attach CSRF token
         },

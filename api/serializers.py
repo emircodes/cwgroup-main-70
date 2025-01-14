@@ -11,27 +11,22 @@ class HobbySerializer(serializers.ModelSerializer):
         }
         
 class UserSerializer(serializers.ModelSerializer):
-    hobbies = HobbySerializer(many=True, required=False)
     
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'name', 'password', 'date_of_birth', 'hobbies')
+        fields = ('id', 'username', 'email', 'name', 'password', 'date_of_birth', 'hobbies', 'friends')
         extra_kwargs = {
             'password': {'write_only': True},
             'username': {'required': False}  
         }
 
      # Use email as username (reference: learnouts.com)
-    def create(self, validated_data):
-        hobbies_data = validated_data.pop('hobbies', [])
-        
+    def create(self, validated_data):        
         if not validated_data.get('username'):
             validated_data['username'] = validated_data['email'] 
         user = User.objects.create_user(**validated_data)
         
-        for hobby_data in hobbies_data:
-            hobby, created = Hobby.objects.get_or_create(name=hobby_data['name'])
-            user.hobbies.add(hobby) 
+ 
         
         return user
 

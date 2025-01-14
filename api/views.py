@@ -76,6 +76,8 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user  # Returns the authenticated user
+    
+    
 
 # Hobby List/Create View
 class HobbyListCreateView(generics.ListCreateAPIView):

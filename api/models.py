@@ -59,6 +59,12 @@ class User(AbstractUser):
 
     def remove_friend(self, user):
         self.friends.remove(user)
+        
+    def add_hobby(self):
+        self.hobbies.add(Hobby)
+        
+    def remove_hobby(self):
+        self.hobbies.remove(Hobby)
 
 
 class Hobby(models.Model):
