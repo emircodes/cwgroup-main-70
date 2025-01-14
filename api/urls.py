@@ -11,6 +11,7 @@ from .views import (
     UserProfileView,
     HobbyListCreateView,
     AllUsersView,
+    similar_users,
     get_csrf_token
 )
 
@@ -24,5 +25,6 @@ urlpatterns = [
     path('profile/', login_required(UserProfileView.as_view()), name='profile'),  # Securing profile route
     path('hobbies/', login_required(HobbyListCreateView.as_view()), name='hobby-list'),  # Securing hobbies route
     path('api/users/', AllUsersView.as_view(), name='all-users'),
+    path('similar-users/', similar_users, name='similar-users'),
     path('get-token/', get_csrf_token, name='getToken')
 ]

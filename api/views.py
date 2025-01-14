@@ -3,6 +3,8 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
+from rest_framework.decorators import api_view
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -23,7 +25,7 @@ def get_csrf_token(request):
 # Main SPA View
 @login_required
 def main_spa(request):
-    return render(request, '/api/spa/index.html')
+    return render(request, 'templates/api/spa/index.html')
 
 # Login View
 @csrf_protect
@@ -92,3 +94,19 @@ class AllUsersView(APIView):
         users = User.objects.all()  # Fetch all users
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
+    
+@api_view(['GET'])
+def similar_users(request):
+    # Get the hobbies of the current user
+    user = request.user
+    user_hobbies = user.hobbies.all()
+
+    # Get other users and count similar hobbies
+    similar_users = (
+        User.objects.exclude(id=user.id)  # Exclude the current user
+        .annotate(similarity_score=Count('hobbies', filter=Hobby.objects.filter(id__in=user_hobbies)))
+        .order_by('-similarity_score')  # Order by most similar
+    )
+
+    serializer = UserSerializer(similar_users, many=True)
+    return Response(serializer.data)

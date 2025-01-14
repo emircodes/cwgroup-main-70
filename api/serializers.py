@@ -11,10 +11,12 @@ class HobbySerializer(serializers.ModelSerializer):
         }
         
 class UserSerializer(serializers.ModelSerializer):
-    
+    hobbies = HobbySerializer(many=True, required=False)
+    similarity_score = serializers.IntegerField(read_only=True) 
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'name', 'password', 'date_of_birth', 'hobbies', 'friends')
+        fields = ('id', 'username', 'email', 'name', 'password', 'date_of_birth', 'hobbies', 'similarity_score')
         extra_kwargs = {
             'password': {'write_only': True},
             'username': {'required': False}  
