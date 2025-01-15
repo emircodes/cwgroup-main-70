@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Q
 from rest_framework.decorators import api_view
 from rest_framework import generics, status
 from rest_framework.views import APIView
@@ -104,8 +104,8 @@ def similar_users(request):
     # Get other users and count similar hobbies
     similar_users = (
         User.objects.exclude(id=user.id)  # Exclude the current user
-        .annotate(similarity_score=Count('hobbies', filter=Hobby.objects.filter(id__in=user_hobbies)))
-        .order_by('-similarity_score')  # Order by most similar
+        .annotate(similarity_score=Count('hobbies', filter=Q(hobbies__id__in=user_hobbies)))  # Use Q for filtering
+        .order_by('-similarity_score')  # Order by similarity score
     )
 
     serializer = UserSerializer(similar_users, many=True)
