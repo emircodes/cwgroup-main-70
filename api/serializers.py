@@ -11,7 +11,6 @@ class HobbySerializer(serializers.ModelSerializer):
         }
         
 class UserSerializer(serializers.ModelSerializer):
-    hobbies = HobbySerializer(many=True, required=False)
     similarity_score = serializers.IntegerField(read_only=True) 
 
     class Meta:

@@ -28,7 +28,7 @@
       </form>
 
       <div class="col" >
-        <form @submit.prevent="updateHobbyTextToUserApi">
+        <form @submit.prevent="updateHobby">
           <!--add 1 Hobby-->
           <div class="input-group mb-3">
             <button class="btn btn-secondary" type="submit" id="button-addon1">Add Hobby</button>
@@ -42,14 +42,14 @@
           <button class="btn btn-outline-secondary" type="submit">Add Hobby</button>
           <select class="form-select" id="inputGroupSelect03" aria-label="select hobby with button">
             <option selected>Choose...</option>
-            <option v-for="item in selectHobbies" :key="hobby" >{{ item }}</option>
+            <option v-for="item in selectHobbies" :key="hobby" >{{ item.name }}</option>
           </select>
         </div>
 
         <div class="card">
           <h1>My Hobbies</h1>
           <ul class="list-group">
-            <li class="list-group-item" v-for="item in personalHobbies" >{{ item }}</li>
+            <li class="list-group-item" v-for="item in personalHobbiesNameIdentifier" >{{ item.name }}</li>
           </ul>
         </div>
       </div>
@@ -62,7 +62,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, toRaw } from 'vue';
   import axios from 'axios';
   
   const name = ref('');
@@ -70,20 +70,35 @@
   const date_of_birth = ref<string | null>(null);
   const message = ref('');
   const personalHobbies = ref([]); 
+  const personalHobbiesNameIdentifier = ref([]);
   const repositoryHobbies = ref([]);
   let selectHobbies = ref([]);
   const hobby = ref('');
   const error = ref('');
 
 
+  function personalHobbiesName() {
+    personalHobbiesNameIdentifier.value = repositoryHobbies.value.filter((hobby) => personalHobbies.value.includes(hobby.id) === true);
+  }
 
+  function filter() {
+    selectHobbies.value = repositoryHobbies.value.filter((hobby) => personalHobbies.value.includes(hobby.id) === false);
+  }
+
+  async function refreshHobbies() {
+    try {
+      const response = await axios.get('/api/hobbies');
+      repositoryHobbies.value = response.data;
+    } catch (err) {
+      error.value = 'Failed to refresh hobbies';
+    }
+  }
 
   // Fetch user profile on mount
   onMounted(async () => {
     try {
-      const reHobby = await axios.get('/api/hobbies');
-      repositoryHobbies.value = reHobby.data;
-      console.log(reHobby.data)
+      await refreshHobbies();
+      console.log(repositoryHobbies.value)
 
       const response = await axios.get('/api/profile/', { withCredentials: true });
       name.value = response.data.name;
@@ -92,20 +107,89 @@
       personalHobbies.value = response.data.hobbies;  // Assuming hobbies are stored in an array in the API response
       console.log(response.data)
       console.log(response.data.hobbies);
+      console.log(personalHobbies.value);
       
     } catch (err) {
       error.value = 'Failed to load profile';
     }
 
-
+    filter();  // Filter out hobbies that are already in the user's list
+    personalHobbiesName();
   });
   
-  function selectHobby(){
-    console.log(personalHobbies);
-    console.log(repositoryHobbies);
-    selectHobbies.value = [];
-    console.log(selectHobbies);
+ 
+  // update hobby to hobby api 
+  const updateHobbyToApiHobby = async() => {
+    try {
+      const csrfToken = getCookie('csrftoken');
+      const res = await axios.post('/api/hobbies/', {
+        name: hobby.value,
+      }, {
+        headers: {
+          'X-CSRFToken': csrfToken  // Attach CSRF token
+        },
+        withCredentials: true  // Include session cookies
+      })
+    } catch(err) {
+      console.error('Failed to add hobby to API:', err);
+    }
   }
+
+  // update hobby to user api profile
+  const updateHobbyToApiProfile = async() => {
+    try {
+      const csrfToken = getCookie('csrftoken');
+      const matchedHobby = repositoryHobbies.value.find((x) => x.name === hobby.value);
+      const hobbyId = matchedHobby.id
+
+      if (matchedHobby) {
+        personalHobbies.value.push(hobbyId);
+      } else {
+        console.error(`Hobby with name "${hobby.value}" not found in repositoryHobbies.`);
+      }
+
+      const raw = toRaw(personalHobbies.value)
+      console.log(raw);
+
+      console.log("add" + personalHobbies.value);
+      await axios.patch('/api/profile/', {
+        hobbies: raw,
+      }, {
+        headers: {
+          'X-CSRFToken': csrfToken  // Attach CSRF token
+        },
+        withCredentials: true  // Include session cookies
+      })
+    } catch(err) {
+      console.error('Failed to add hobby to API:', err);
+    }
+  }
+
+  const updateHobby = async () => {
+    try {
+      const apihobby = await updateHobbyToApiHobby();
+
+      if (!apihobby) {
+        message.value = 'Hobby added successfully';
+        await refreshHobbies();
+        const apiprofile = await updateHobbyToApiProfile();
+        if (!apiprofile) {
+          message.value = 'Profile updated successfully';
+          window.location.reload();
+        } else {
+          message.value = 'Profile failed to update after adding hobby';
+        }
+      } else {
+        error.value = 'Hobby already exists';
+      }
+
+    } catch (err) {
+      error.value = 'Failed to add hobby';
+    }
+
+    
+  }
+
   // Update profile
   const updateProfile = async () => {
     try {
@@ -126,44 +210,7 @@
     }
   };
   
-  // updates hobby
-  const updateHobbyTextToHobbyApi = async () => {
-    try {
-      console.log(personalHobbies.value);
-      
-      const csrftoken = getCookie('csrftoken');  // Get CSRF token
-      await axios.post('/api/hobbies/', {
-        name: hobby.value,
-      }, {
-        headers: {
-          'X-CSRFToken': csrftoken  // Attach CSRF token
-        },
-        withCredentials: true  // Include session cookies
-      });
-      message.value = 'Profile updated successfully';
-    } catch (err) {
-      error.value = String(err);
-      error.value = 'Failed to add hobby';
-    }
-  };
-
-  const updateHobbyTextToUserApi = async () => {
-    try {
-      const csrftoken = getCookie('csrftoken');  // Get CSRF token
-      await axios.patch('/api/profile/', {
-        hobbies: [1,2],
-      }, {
-        headers: {
-          'X-CSRFToken': csrftoken  // Attach CSRF token
-        },
-        withCredentials: true  // Include session cookies
-      });
-      message.value = 'Profile updated successfully';
-    } catch (err) {
-      error.value = String(err);
-      error.value = 'Failed to add hobby';
-    }
-  };
+  
   
   // Get CSRF token from cookies
   function getCookie(name: string | any[]) {
