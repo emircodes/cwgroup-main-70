@@ -42,7 +42,7 @@
         <div class="card">
           <h1>My Hobbies</h1>
 
-          <form @submit="deleteHobby">
+          <form>
             <div class="input-group mb-3" v-for=" item in personalHobbiesNameIdentifier">
               <input type="text" class="form-control" :value='item.name'  readonly >
               <button @click="extractHobbyToDelete(item.id)" type="submit" class="btn btn-danger">Delete</button>            
@@ -73,13 +73,25 @@
   let selectHobbies = ref([]);
   const hobby = ref('');
   const error = ref('');
-  const deleteHobbyValue = ref();
 
-  function extractHobbyToDelete( item: number) {
-    deleteHobbyValue.value = item;
-    console.log('clicked ' + deleteHobbyValue.value)
+  // delete hobbies
+  async function extractHobbyToDelete( item: number) {
+    if (item){
+      const number = personalHobbies.value.findIndex((x) => x === item)
+
+      if(number != -1){
+        await deleteHobby(number);
+      }
+      
+      else{
+        error.value = 'No such Hobby is found'
+      }
+    } else {
+      error.value = 'No item selected to delete'
+    }
     
   }
+
   // extracts personal hobbies from api to name
   function personalHobbiesName() {
     personalHobbiesNameIdentifier.value = repositoryHobbies.value.filter((hobby) => personalHobbies.value.includes(hobby.id) === true);
@@ -125,10 +137,9 @@
   });
   
  
-  const deleteHobby = async() => {
+  const deleteHobby = async(item: number) => {
     try {
-      const number = personalHobbies.value.find((x) => x.value === deleteHobbyValue)
-      personalHobbies.value.splice(number, 1);
+      personalHobbies.value.splice(item, 1);
 
       const csrfToken = getCookie('csrftoken');
       await axios.patch('/api/profile/', {
@@ -142,7 +153,7 @@
       console.log(personalHobbies.value);
       
     } catch (err) {
-      
+      console.error(err);
     }
   }
 
