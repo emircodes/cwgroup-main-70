@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from .models import User, Hobby
-from .serializers import UserSerializer, HobbySerializer
+from .serializers import UserSerializer, HobbySerializer, UserReadSerializer
 import json
 import logging
 from django.middleware.csrf import get_token
@@ -73,8 +73,11 @@ class RegisterUserView(generics.CreateAPIView):
 # User Profile View
 class UserProfileView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+    def get_serializer_class(self):
+        if self.request.method in ['GET']:
+            return UserReadSerializer
+        return UserSerializer
 
     def get_object(self):
         return self.request.user  # Returns the authenticated user
@@ -92,21 +95,23 @@ class AllUsersView(APIView):
 
     def get(self, request):
         users = User.objects.all()  # Fetch all users
-        serializer = UserSerializer(users, many=True)
+        serializer = UserReadSerializer(users, many=True)
         return Response(serializer.data)
-    
+
 @api_view(['GET'])
 def similar_users(request):
     # Get the hobbies of the current user
     user = request.user
-    user_hobbies = user.hobbies.all()
+    user_hobbies = user.hobbies.values_list('id', flat=True)  # Extract a flat list of hobby IDs
 
     # Get other users and count similar hobbies
     similar_users = (
         User.objects.exclude(id=user.id)  # Exclude the current user
-        .annotate(similarity_score=Count('hobbies', filter=Q(hobbies__id__in=user_hobbies)))  # Use Q for filtering
+        .annotate(similarity_score=Count('hobbies', filter=Q(hobbies__id__in=user_hobbies)))  # Filter by hobby IDs
         .order_by('-similarity_score')  # Order by similarity score
     )
 
-    serializer = UserSerializer(similar_users, many=True)
+    # Serialize and return the data
+    serializer = UserReadSerializer(similar_users, many=True)
     return Response(serializer.data)
+
