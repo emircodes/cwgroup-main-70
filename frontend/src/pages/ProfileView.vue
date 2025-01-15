@@ -32,19 +32,12 @@
           <!--add 1 Hobby-->
           <div class="input-group mb-3">
             <button class="btn btn-secondary" type="submit" id="button-addon1">Add Hobby</button>
-            <input v-model="hobby" type="text" class="form-control" placeholder="" aria-label="add hobby text" aria-describedby="button-addon1">
+            <input v-model="hobby" list='datalistOptions' type="text" class="form-control" placeholder="" aria-label="add hobby text" aria-describedby="button-addon1">
+            <datalist id="datalistOptions">
+              <option v-for="item in selectHobbies" >{{ item.name }}</option>
+            </datalist>
           </div>
         </form>
-        
-
-        <!--Multiple Hobbies-->
-        <div class="input-group mb-3">
-          <button class="btn btn-outline-secondary" type="submit">Add Hobby</button>
-          <select class="form-select" id="inputGroupSelect03" aria-label="select hobby with button">
-            <option selected>Choose...</option>
-            <option v-for="item in selectHobbies" :key="hobby" >{{ item.name }}</option>
-          </select>
-        </div>
 
         <div class="card">
           <h1>My Hobbies</h1>
@@ -167,22 +160,23 @@
 
   const updateHobby = async () => {
     try {
-      const apihobby = await updateHobbyToApiHobby();
+      if (repositoryHobbies.value.find((x) => x.name !== hobby.value)){
+        const apihobby = await updateHobbyToApiHobby();
 
-      if (!apihobby) {
-        message.value = 'Hobby added successfully';
-        await refreshHobbies();
-        const apiprofile = await updateHobbyToApiProfile();
-        if (!apiprofile) {
-          message.value = 'Profile updated successfully';
-          window.location.reload();
+        if (!apihobby) {
+          message.value = 'Hobby added successfully';
+          await refreshHobbies();
+          const apiprofile = await updateHobbyToApiProfile();
+          if (!apiprofile) {
+            message.value = 'Profile updated successfully';
+            window.location.reload();
+          } else {
+            message.value = 'Profile failed to update after adding hobby';
+          }
         } else {
-          message.value = 'Profile failed to update after adding hobby';
+          error.value = 'Hobby already exists';
         }
-      } else {
-        error.value = 'Hobby already exists';
       }
-
     } catch (err) {
       error.value = 'Failed to add hobby';
     }
