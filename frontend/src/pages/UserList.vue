@@ -8,8 +8,7 @@
             <th>Username</th>
             <th>Email</th>
             <th>Name</th>
-            <th>Similarity</th> 
-            <th>Age</th>
+            <th>Similarity</th> <!-- New column for similarity score -->
           </tr>
         </thead>
         <tbody>
@@ -18,8 +17,7 @@
             <td>{{ user.username }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.name }}</td>
-            <td>{{ user.similarity_score }}</td>
-            <td>{{ user.calculated_age }}</td>
+            <td>{{ user.similarity_score }}</td> <!-- Display similarity score -->
           </tr>
         </tbody>
       </table>
@@ -35,7 +33,6 @@
     username: string;
     email: string;
     name: string;
-    calculated_age: number;
     similarity_score: number;
   }
   
