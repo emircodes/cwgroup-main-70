@@ -8,7 +8,7 @@
           <input v-model="name" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
         </div>
 
-        <div>
+        <div class="mb-3">
           <!--Password-->
           <div class="row g-3 align-items-center input-group ">
             <div class="col-auto">
@@ -27,11 +27,7 @@
             <div class="col-auto">
               <input v-model="validatePassword" @change="validator" type="password" id="inputPassword6" class="form-control " :class="outlineCSS" aria-describedby="passwordHelpInline">
             </div>
-            <div class="col-auto">
-              <span id="passwordHelpInline" class="form-text">
-                Must be 8-20 characters long.
-              </span>
-            </div>
+          
           </div>
         </div>
 
@@ -49,7 +45,8 @@
 
         <!--Save button-->
         <div class="input-group mb-3">
-          <button class="btn btn-primary" type="submit">Save</button>
+          <button class="btn btn-primary m-2" type="submit">Save</button>
+          <button @click="toHome" class="btn btn-primary m-2" type="button">Back to Home</button>
         </div>
         
       </form>
@@ -89,7 +86,8 @@
   <script setup lang="ts">
   import { ref, onMounted, toRaw } from 'vue';
   import axios from 'axios';
-  
+  import { useRouter } from 'vue-router';
+
   const outlineCSS = ref<'is-valid'| 'is-invalid'>();
   const name = ref('');
   const email = ref('');
@@ -103,6 +101,11 @@
   let selectHobbies = ref([]);
   const hobby = ref('');
   const error = ref('');
+  const router = useRouter();
+
+  function toHome() {
+    router.push('/');
+  }
 
   function validator() {
     if(password.value !== validatePassword.value) {
