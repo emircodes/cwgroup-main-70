@@ -8,6 +8,33 @@
           <input v-model="name" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
         </div>
 
+        <div>
+          <!--Password-->
+          <div class="row g-3 align-items-center input-group ">
+            <div class="col-auto">
+              <span class="input-group-text" id="basic-addon1">Password</span>
+            </div>
+            <div class="col-auto">
+              <input v-model="password" type="password" id="inputPassword6" class="form-control" :class="outlineCSS" aria-describedby="passwordHelpInline">
+            </div>
+          </div>
+
+          <!--Validate Password-->
+          <div class="row g-3 align-items-center input-group">
+            <div class="col-auto">
+              <span class="input-group-text" id="basic-addon1">Validate Password</span>
+            </div>
+            <div class="col-auto">
+              <input v-model="validatePassword" @change="validator" type="password" id="inputPassword6" class="form-control " :class="outlineCSS" aria-describedby="passwordHelpInline">
+            </div>
+            <div class="col-auto">
+              <span id="passwordHelpInline" class="form-text">
+                Must be 8-20 characters long.
+              </span>
+            </div>
+          </div>
+        </div>
+
         <!--Email-->
         <div class="input-group mb-3">
           <span class="input-group-text" id="basic-addon1">Email</span>
@@ -63,16 +90,30 @@
   import { ref, onMounted, toRaw } from 'vue';
   import axios from 'axios';
   
+  const outlineCSS = ref<'is-valid'| 'is-invalid'>();
   const name = ref('');
   const email = ref('');
   const date_of_birth = ref<string | null>(null);
   const message = ref('');
+  const password = ref<string | null>();
+  const validatePassword = ref<string | null>();
   const personalHobbies = ref([]); 
   const personalHobbiesNameIdentifier = ref([]);
   const repositoryHobbies = ref([]);
   let selectHobbies = ref([]);
   const hobby = ref('');
   const error = ref('');
+
+  function validator() {
+    if(password.value !== validatePassword.value) {
+      error.value = 'Passwords do not match';
+      outlineCSS.value = 'is-invalid';
+      password.value = null
+    } else {
+      outlineCSS.value = 'is-valid'
+      error.value = '';
+    }
+  }
 
   // delete hobbies
   async function extractHobbyToDelete( item: number) {
@@ -122,7 +163,8 @@
       name.value = response.data.name;
       email.value = response.data.email;
       date_of_birth.value = (response.data.date_of_birth);
-      personalHobbies.value = response.data.hobbies;  // Assuming hobbies are stored in an array in the API response
+      personalHobbies.value = response.data.hobbies; 
+      password.value = response.data.password; // Assuming hobbies are stored in an array in the API response
       console.log(response.data)
       console.log(response.data.hobbies);
       console.log(personalHobbies.value);
@@ -231,12 +273,14 @@
 
   // Update profile
   const updateProfile = async () => {
+    
     try {
       const csrftoken = getCookie('csrftoken');  // Get CSRF token
       await axios.patch('/api/profile/', {
         name: name.value,
         email: email.value,
         date_of_birth: date_of_birth.value,
+        password: password.value,
       }, {
         headers: {
           'X-CSRFToken': csrftoken  // Attach CSRF token
