@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const useUserStore = defineStore('userStore', {
   state: () => ({
-    similarUsers: [] as Array<{ id: number; username: string; email: string; name: string; similarity_score: number; }>,
+    similarUsers: [] as Array<{ id: number; username: string; email: string; name: string; calculated_age: number; similarity_score: number; }>,
   }),
   actions: {
     async fetchSimilarUsers() {
