@@ -41,9 +41,14 @@
 
         <div class="card">
           <h1>My Hobbies</h1>
-          <ul class="list-group">
-            <li class="list-group-item" v-for="item in personalHobbiesNameIdentifier" >{{ item.name }}</li>
-          </ul>
+
+          <form @submit="deleteHobby">
+            <div class="input-group mb-3" v-for=" item in personalHobbiesNameIdentifier">
+              <input type="text" class="form-control" :value='item.name'  readonly >
+              <button @click="extractHobbyToDelete(item.id)" type="submit" class="btn btn-danger">Delete</button>            
+            </div>
+          </form>
+
         </div>
       </div>
 
@@ -68,16 +73,24 @@
   let selectHobbies = ref([]);
   const hobby = ref('');
   const error = ref('');
+  const deleteHobbyValue = ref();
 
-
+  function extractHobbyToDelete( item: number) {
+    deleteHobbyValue.value = item;
+    console.log('clicked ' + deleteHobbyValue.value)
+    
+  }
+  // extracts personal hobbies from api to name
   function personalHobbiesName() {
     personalHobbiesNameIdentifier.value = repositoryHobbies.value.filter((hobby) => personalHobbies.value.includes(hobby.id) === true);
   }
 
+  // filters personal hobbies and repos 
   function filter() {
     selectHobbies.value = repositoryHobbies.value.filter((hobby) => personalHobbies.value.includes(hobby.id) === false);
   }
 
+  // refresh hobbies repos
   async function refreshHobbies() {
     try {
       const response = await axios.get('/api/hobbies');
@@ -108,9 +121,31 @@
 
     filter();  // Filter out hobbies that are already in the user's list
     personalHobbiesName();
+    
   });
   
  
+  const deleteHobby = async() => {
+    try {
+      const number = personalHobbies.value.find((x) => x.value === deleteHobbyValue)
+      personalHobbies.value.splice(number, 1);
+
+      const csrfToken = getCookie('csrftoken');
+      await axios.patch('/api/profile/', {
+        hobbies: personalHobbies.value,
+      }, {
+        headers: {
+          'X-CSRFToken': csrfToken  // Attach CSRF token
+        },
+        withCredentials: true  // Include session cookies
+      })
+      console.log(personalHobbies.value);
+      
+    } catch (err) {
+      
+    }
+  }
+
   // update hobby to hobby api 
   const updateHobbyToApiHobby = async() => {
     try {
@@ -158,6 +193,7 @@
     }
   }
 
+  // update hobby from textfield
   const updateHobby = async () => {
     try {
       if (repositoryHobbies.value.find((x) => x.name !== hobby.value)){
@@ -179,9 +215,7 @@
       }
     } catch (err) {
       error.value = 'Failed to add hobby';
-    }
-
-    
+    }  
   }
 
   // Update profile
