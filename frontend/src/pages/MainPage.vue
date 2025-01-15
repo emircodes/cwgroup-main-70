@@ -1,24 +1,36 @@
 <template>
-  <div class="h1">
-    {{ title }}
+
+
+  <div class="input-group">
+    <ul class="nav nav-pills">
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="page" @click="goToProfile" >My Profile</a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li>
+    </ul>
+    <!-- User List -->
+    <UserList />
+
   </div>
-
-
-  <LoginForm></LoginForm>
 </template>
 
-<script lang="ts">
-    import { defineComponent } from "vue";
-  import LoginForm from "./LoginForm.vue";
+<script setup lang="ts">
+    import { useRouter } from "vue-router";
+    import UserList from "./UserList.vue"
 
-    export default defineComponent({
-        data() {
-            return {
-                title: "hi Page",
-            }
-        }
-    })
+    const router = useRouter();
+
+    const goToProfile = () => {
+        router.push("/profile");
+    }
+
 </script>
 
-<style scoped>
+<style >
+.nav {
+  margin-bottom: 20px;
+}
 </style>

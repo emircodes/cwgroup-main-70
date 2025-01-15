@@ -1,25 +1,34 @@
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
+from rest_framework.decorators import api_view
 from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from .models import User, Hobby
 from .serializers import UserSerializer, HobbySerializer
 import json
 import logging
+from django.middleware.csrf import get_token
+
 
 logger = logging.getLogger(__name__)
 
+def get_csrf_token(request):
+    token = get_token(request)
+    return JsonResponse({'token': token})
+
 # Main SPA View
-@login_required  # Automatically uses LOGIN_URL from settings.py
-def main_spa(request: HttpRequest) -> HttpResponse:
-    return render(request, 'api/spa/index.html', {})
+@login_required
+def main_spa(request):
+    return render(request, 'templates/api/spa/index.html')
 
 # Login View
-@csrf_exempt
+@csrf_protect
 def login_view(request):
     if request.method == 'POST':
         try:
@@ -31,6 +40,7 @@ def login_view(request):
 
             if user:
                 login(request, user)
+                
                 return JsonResponse({'message': 'Login successful'})
             else:
                 return JsonResponse({'error': 'Invalid credentials'}, status=400)
@@ -39,10 +49,8 @@ def login_view(request):
             return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
 
 # Logout View
-@csrf_exempt
 def logout_view(request):
     logout(request)
-    return JsonResponse({'message': 'Logged out successfully'})
 
 # Register User View
 class RegisterUserView(generics.CreateAPIView):
@@ -70,9 +78,35 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user  # Returns the authenticated user
+    
+    
 
 # Hobby List/Create View
 class HobbyListCreateView(generics.ListCreateAPIView):
     queryset = Hobby.objects.all()
     serializer_class = HobbySerializer
     permission_classes = [IsAuthenticated]
+
+class AllUsersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        users = User.objects.all()  # Fetch all users
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+    
+@api_view(['GET'])
+def similar_users(request):
+    # Get the hobbies of the current user
+    user = request.user
+    user_hobbies = user.hobbies.all()
+
+    # Get other users and count similar hobbies
+    similar_users = (
+        User.objects.exclude(id=user.id)  # Exclude the current user
+        .annotate(similarity_score=Count('hobbies', filter=Q(hobbies__id__in=user_hobbies)))  # Use Q for filtering
+        .order_by('-similarity_score')  # Order by similarity score
+    )
+
+    serializer = UserSerializer(similar_users, many=True)
+    return Response(serializer.data)

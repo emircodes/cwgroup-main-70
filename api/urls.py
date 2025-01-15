@@ -10,13 +10,21 @@ from .views import (
     RegisterUserView,
     UserProfileView,
     HobbyListCreateView,
+    AllUsersView,
+    similar_users,
+    get_csrf_token
 )
 
+spa = login_required(main_spa)
+
 urlpatterns = [
-    path('', login_required(main_spa), name='home'),  # Ensures login required for the main SPA
+    path('', spa, name='home'),  # Ensures login required for the main SPA
     path('register/', RegisterUserView.as_view(), name='register'),
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),  # Using Django's built-in login view
+    path('login/', login_view, name='login'),  # Using Django's built-in login view
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),  # Using Django's built-in logout view
     path('profile/', login_required(UserProfileView.as_view()), name='profile'),  # Securing profile route
     path('hobbies/', login_required(HobbyListCreateView.as_view()), name='hobby-list'),  # Securing hobbies route
+    path('api/users/', AllUsersView.as_view(), name='all-users'),
+    path('similar-users/', similar_users, name='similar-users'),
+    path('get-token/', get_csrf_token, name='getToken')
 ]
