@@ -9,11 +9,13 @@ from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from .models import User, Hobby
-from .serializers import UserSerializer, HobbySerializer
+from .models import User, Hobby, FriendRequest
+from .serializers import UserSerializer, HobbySerializer, FriendSerializer
 import json
 import logging
 from django.middleware.csrf import get_token
+from rest_framework.generics import ListAPIView
+
 
 
 logger = logging.getLogger(__name__)
@@ -52,6 +54,23 @@ def login_view(request):
 def logout_view(request):
     logout(request)
 
+# Friend Request
+class ListFriendRequestsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        sent_requests = FriendRequest.objects.filter(sender=request.user)
+        received_requests = FriendRequest.objects.filter(receiver=request.user)
+
+        sent_serializer = FriendSerializer(sent_requests, many=True)
+        received_serializer = FriendSerializer(received_requests, many=True)
+
+        return Response({
+            'sent_requests': sent_serializer.data,
+            'received_requests': received_serializer.data,
+        })
+        
+        
 # Register User View
 class RegisterUserView(generics.CreateAPIView):
     queryset = User.objects.all()

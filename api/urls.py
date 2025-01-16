@@ -12,7 +12,8 @@ from .views import (
     HobbyListCreateView,
     AllUsersView,
     similar_users,
-    get_csrf_token
+    get_csrf_token,
+    ListFriendRequestsView,
 )
 
 spa = login_required(main_spa)
@@ -26,5 +27,6 @@ urlpatterns = [
     path('hobbies/', login_required(HobbyListCreateView.as_view()), name='hobby-list'),  # Securing hobbies route
     path('api/users/', AllUsersView.as_view(), name='all-users'),
     path('similar-users/', similar_users, name='similar-users'),
-    path('get-token/', get_csrf_token, name='getToken')
+    path('get-token/', get_csrf_token, name='getToken'),
+    path('api/get-friend-request/', ListFriendRequestsView.as_view(), name='friend-request'),
 ]

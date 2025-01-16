@@ -8,7 +8,7 @@
       </li>
 
       <li class="nav-item">
-        <a class="nav-link" href="#">Link</a>
+        <a class="nav-link" @click="goToFriendRequest">Friends</a>
       </li>
     </ul>
     <!-- User List -->
@@ -25,6 +25,10 @@
 
     const goToProfile = () => {
         router.push("/profile");
+    }
+
+    const goToFriendRequest = () => {
+      router.push("/friends");
     }
 
 </script>

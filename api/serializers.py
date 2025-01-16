@@ -1,8 +1,15 @@
 from rest_framework import serializers
-from .models import User, Hobby
+from .models import User, Hobby, FriendRequest
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import update_session_auth_hash
 
+class FriendSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FriendRequest
+        fields = ['id', 'sender', 'receiver', 'created_at', 'status']
+        
+        
+        
 class HobbySerializer(serializers.ModelSerializer):
     class Meta:
         model = Hobby
@@ -16,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'name', 'password', 'date_of_birth', 'hobbies', 'similarity_score')
+        fields = ('id', 'username', 'email', 'name', 'password', 'date_of_birth', 'hobbies', 'similarity_score', 'friends')
         extra_kwargs = {
             'password': {'write_only': True},
             'username': {'required': False}  

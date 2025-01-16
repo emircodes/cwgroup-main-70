@@ -56,7 +56,8 @@ class User(AbstractUser):
     
     def add_friend(self, user):
         self.friends.add(user)
-
+        
+    
     def remove_friend(self, user):
         self.friends.remove(user)
         
@@ -104,7 +105,6 @@ class FriendRequest(models.Model):
             message=f"{self.receiver.name} accepted your friend request.",
         )
 
-        self.delete()
 
     def reject(self):
         if self.status != 'pending':
