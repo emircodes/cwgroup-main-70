@@ -126,3 +126,10 @@ class Notification(models.Model):
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message[:20]}"
     
+    def mark_as_read(self) -> None:
+        self.is_read = True
+        self.dave()
+
+    @staticmethod
+    def mark_all_as_read(user: "User") -> None:
+        user.notifications.filter(is_read=False).update(is_read=True)
