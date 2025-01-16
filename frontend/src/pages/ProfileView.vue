@@ -305,6 +305,7 @@ const updateHobby = async () => {
         const apiprofile = await updateHobbyToApiProfile();
         if (!apiprofile) {
           message.value = 'Profile updated successfully';
+          hobby.value = ''
           await refreshHobbies();
           filter();
           personalHobbiesName();

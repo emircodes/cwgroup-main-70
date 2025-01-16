@@ -1,49 +1,57 @@
 <template>
-  <div>
-    <h2>User List</h2>
+  <div class="m-auto d-flex">
+    <div style="width: 85vw;">
+      <div class="card-body mt-2">
+        <div class="card">
+          <h2 class="card-title">User List</h2>
 
-    <!-- Age Range Dropdown -->
-    <div class="age-filter">
-      <label for="ageRange">Select Age Range:</label>
-      <select v-model="selectedAgeRange" id="ageRange">
-        <option v-for="range in ageRanges" :key="range.label" :value="range">
-          {{ range.label }}
-        </option>
-      </select>
-    </div>
+          <!-- Age Range Dropdown -->
+          <div class="age-filter">
+            <label for="ageRange">Select Age Range:</label>
+            <select v-model="selectedAgeRange" id="ageRange">
+              <option v-for="range in ageRanges" :key="range.label" :value="range">
+                {{ range.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+          
 
-    <!-- User Table -->
-    <table>
-      <thead>
-        <tr>
-          <th>Username</th>
-          <th>Email</th>
-          <th>Name</th>
-          <th>Age</th>
-          <th>Similarity Score</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="user in users" :key="user.id">
-          <td>{{ user.username }}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.name }}</td>
-          <td>{{ user.calculated_age }}</td>
-          <td>{{ user.similarity_score }}</td>
-        </tr>
-      </tbody>
-    </table>
+        <!-- User Table -->
+        <table class="mb-2">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Similarity Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="user in users" :key="user.id">
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.name }}</td>
+              <td>{{ user.calculated_age }}</td>
+              <td>{{ user.similarity_score }}</td>
+            </tr>
+          </tbody>
+        </table>
 
-    <!-- Pagination Controls -->
-    <div class="pagination">
-      <button :disabled="!pagination.previous" @click="navigateToPage(pagination.previous)">
-        Previous
-      </button>
-      <button :disabled="!pagination.next" @click="navigateToPage(pagination.next)">
-        Next
-      </button>
+        <!-- Pagination Controls -->
+        <div class="pagination">
+          <button :disabled="!pagination.previous" @click="navigateToPage(pagination.previous)">
+            Previous
+          </button>
+          <button :disabled="!pagination.next" @click="navigateToPage(pagination.next)">
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   </div>
+  
 </template>
 
 <script setup lang="ts">
