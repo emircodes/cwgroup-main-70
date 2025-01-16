@@ -15,17 +15,22 @@
                     Home
                     </button>
                 </li>
-                <li class="nav-item">
-                    <button class="nav-link btn btn-secondary" 
+                <li class="nav-item ">
+                    <button class="nav-link btn btn-secondary " 
                     :class="{'active': activeNav === 'profile' }"
                     @click="goToProfile">
                     My Profile
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link btn btn-secondary" 
+                    <button class="nav-link btn btn-secondary position-relative" 
                     :class="{'active': activeNav === 'friends' }"
                     @click="goToFriends">
+                    <span v-if="friendReqLength.getLength > 0"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ friendReqLength.getLength }}
+                        <span class="visually-hidden">unread messages</span>
+                    </span>
                     Friends
                     </button>
                 </li>
@@ -52,7 +57,9 @@ import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import axios from 'axios';
 import { useAuth } from '../stores/auth';
+import { useFriendReqData } from '../stores/getFriendReq';
 
+const friendReqLength = useFriendReqData();
 const auth = useAuth();
 const router = useRouter();
 const activeNav = ref('');

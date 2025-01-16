@@ -24,97 +24,103 @@
         </li>
       </ul>
       
-    <!--Tabs-->
-    <div class="tab-content" id="myTabContent">
+      <!--Tabs-->
+      <div class="tab-content" id="myTabContent">
 
-      <!-- My Profile -->
-      <div class="tab-pane fade" :class="{'show active': activeTab === 'home'}" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
-        <h1>My Profile</h1>
-        <form @submit.prevent="updateProfile" novalidate class="col">
-          <!--Name-->
-          <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1">Name</span>
-            <input v-model="name" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
-          </div>
+        <!-- My Profile -->
+        <div class="tab-pane fade" :class="{'show active': activeTab === 'home'}" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+          <h1>My Profile</h1>
+          <form @submit.prevent="updateProfile" novalidate class="col">
+            <!--Name-->
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="basic-addon1">Name</span>
+              <input v-model="name" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
 
-          <div class="mb-3">
-            <!--Password-->
-            <div class="row g-3 align-items-center input-group ">
-              <div class="col-auto">
-                <span class="input-group-text" id="basic-addon1">Password</span>
+            <div class="mb-3">
+              <!--Password-->
+              <div class="row g-3 align-items-center input-group ">
+                <div class="col-auto">
+                  <span class="input-group-text" id="basic-addon1">Password</span>
+                </div>
+                <div class="col-auto">
+                  <input v-model="password" type="password" id="inputPassword6" class="form-control" :class="outlineCSS" aria-describedby="passwordHelpInline">
+                </div>
               </div>
-              <div class="col-auto">
-                <input v-model="password" type="password" id="inputPassword6" class="form-control" :class="outlineCSS" aria-describedby="passwordHelpInline">
+
+              <!--Validate Password-->
+              <div class="row g-3 align-items-center input-group">
+                <div class="col-auto">
+                  <span class="input-group-text" id="basic-addon1">Validate Password</span>
+                </div>
+                <div class="col-auto">
+                  <input v-model="validatePassword" @change="validator" type="password" id="inputPassword6" class="form-control " :class="outlineCSS" aria-describedby="passwordHelpInline">
+                </div>
+              
               </div>
             </div>
 
-            <!--Validate Password-->
-            <div class="row g-3 align-items-center input-group">
-              <div class="col-auto">
-                <span class="input-group-text" id="basic-addon1">Validate Password</span>
-              </div>
-              <div class="col-auto">
-                <input v-model="validatePassword" @change="validator" type="password" id="inputPassword6" class="form-control " :class="outlineCSS" aria-describedby="passwordHelpInline">
-              </div>
+            <!--Email-->
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="basic-addon1">Email</span>
+              <input v-model="email" type="email" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+
+            <!--Date of Birth-->
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="basic-addon1">Date of Birth</span>
+              <input v-model="date_of_birth" type="date" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+
+            <!--Save button-->
+            <div class="input-group mb-3">
+              <button class="btn btn-primary m-2" type="submit">Save</button>
+              <button @click="toHome" class="btn btn-primary m-2" type="button">Back to Home</button>
+            </div>
             
-            </div>
-          </div>
-
-          <!--Email-->
-          <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1">Email</span>
-            <input v-model="email" type="email" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
-          </div>
-
-          <!--Date of Birth-->
-          <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1">Date of Birth</span>
-            <input v-model="date_of_birth" type="date" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
-          </div>
-
-          <!--Save button-->
-          <div class="input-group mb-3">
-            <button class="btn btn-primary m-2" type="submit">Save</button>
-            <button @click="toHome" class="btn btn-primary m-2" type="button">Back to Home</button>
-          </div>
-          
-        </form>
-      </div>
-    </div>
-
-    <div class="tab-pane fade " 
-    :class="{'show active': activeTab === 'profile'}" 
-    id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" 
-    tabindex="0">
-      <div class="col" >
-        <form @submit.prevent="updateHobby">
-          <!--add 1 Hobby-->
-          <div class="input-group mb-3">
-            <button class="btn btn-secondary" type="submit" id="button-addon1">Add Hobby</button>
-            <input v-model="hobby" list='datalistOptions' type="text" class="form-control" placeholder="" aria-label="add hobby text" aria-describedby="button-addon1">
-            <datalist id="datalistOptions">
-              <option v-for="item in selectHobbies" >{{ item.name }}</option>
-            </datalist>
-          </div>
-        </form>
-
-        <div class="card"  >
-          <h1>My Hobbies</h1>
-
-          <form class="overflow-y-auto " style="max-height: 300px;">
-            <div class="input-group mb-3 " v-for=" item in personalHobbiesNameIdentifier">
-              <input type="text" class="form-control" :value='item.name'  readonly >
-              <button @click="extractHobbyToDelete(item.id)" type="submit" class="btn btn-danger">Delete</button>            
-            </div>
           </form>
+        </div>
 
+        <div class="tab-pane fade " 
+        :class="{'show active': activeTab === 'profile'}" 
+        id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" 
+        tabindex="0">
+          <div class="col" >
+            <form @submit.prevent="updateHobby">
+              <!--add 1 Hobby-->
+              <div class="input-group mb-3">
+                <button class="btn btn-secondary" type="submit" id="button-addon1">Add Hobby</button>
+                <input v-model="hobby" list='datalistOptions' type="text" class="form-control" placeholder="" aria-label="add hobby text" aria-describedby="button-addon1">
+                <datalist id="datalistOptions">
+                  <option v-for="item in selectHobbies" >{{ item.name }}</option>
+                </datalist>
+              </div>
+            </form>
+
+            <div class="card overflow-y-scroll " style="max-height: 300px;" >
+              <h1>My Hobbies</h1>
+
+              <form class="" 
+              v-for=" item in personalHobbiesNameIdentifier" 
+              @submit.prevent="extractHobbyToDelete(item.id)">
+                <div class="input-group mb-3 ">
+                  <input type="text" class="form-control" :value='item.name'  readonly >
+                  <button type="submit" class="btn btn-danger">Delete</button>            
+                </div>
+              </form>
+
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-      <p v-if="message">{{ message }}</p>
+     
       <p v-if="error" class="error">{{ error }}</p>
     </div>
+
+     <div v-if="message" class="alert alert-success">
+        {{ message }}
+      </div>
   </div>
 </div>
 
@@ -145,6 +151,7 @@ const router = useRouter();
 
 function tabActive(tabName: string){
   activeTab.value = tabName;
+  message.value = ''
 }
 
 function toHome() {
@@ -239,8 +246,11 @@ const deleteHobby = async(item: number) => {
       },
       withCredentials: true  // Include session cookies
     })
-    console.log(personalHobbies.value);
-    
+    message.value = 'Hobby deleted successfully';
+    await refreshHobbies();
+    filter();
+    personalHobbiesName();
+
   } catch (err) {
     console.error(err);
   }
@@ -304,7 +314,7 @@ const updateHobby = async () => {
         await refreshHobbies();
         const apiprofile = await updateHobbyToApiProfile();
         if (!apiprofile) {
-          message.value = 'Profile updated successfully';
+          message.value = 'Hobbie updated successfully';
           hobby.value = ''
           await refreshHobbies();
           filter();

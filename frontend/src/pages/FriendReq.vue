@@ -8,7 +8,8 @@
         <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link position-relative" :class="{active: activeTab === 'home'}" @click="tabActive('home')" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" >
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              <span v-if="friendReq.length > 0"
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                 {{ friendReq.length }}
                 <span class="visually-hidden">unread messages</span>
               </span>
@@ -112,7 +113,9 @@ import axios, { AxiosHeaderValue } from 'axios';
 import { onMounted, onUnmounted, ref, toRaw, watch } from 'vue';
 import { usePersonal } from '../stores/personalAccount';
 import Nav from './Nav.vue';
+import { useFriendReqData } from '../stores/getFriendReq';
 
+const useFriendReqDataStore = useFriendReqData();
 const activeTab = ref('home');
 const users = ref([]);
 const usersCanAddFriends = ref([]);
@@ -151,6 +154,7 @@ onMounted(() => {
   // Initial fetch on mount
   fetchUpdatedData().then(() => {
     filter();
+    useFriendReqDataStore.setLength(pendingUsers.value.length)
     console.log(myFriendsName.value);
   }).catch(err => {
     error.value = 'Failed to load profile: ' + err.message;
