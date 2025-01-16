@@ -49,16 +49,15 @@ class User(AbstractUser):
     
     def add_friend(self, user):
         self.friends.add(user)
-        
     
     def remove_friend(self, user):
         self.friends.remove(user)
         
-    def add_hobby(self):
-        self.hobbies.add(Hobby)
+    def add_hobby(self, hobby: "Hobby") -> None: 
+        self.hobbies.add(hobby)
         
-    def remove_hobby(self):
-        self.hobbies.remove(Hobby)
+    def remove_hobby(self, hobby: "Hobby") -> None:
+        self.hobbies.remove(hobby)
 
 
 class Hobby(models.Model):
