@@ -51,13 +51,16 @@
             <div>
                 <h1> Add Friend</h1>
                 <form>
-                  <div class="input-group mb-3" v-for="friend in usersCanAddFriends":key="friend.id">
+                  <div class="input-group mb-3" 
+                  v-for="friend in usersCanAddFriends":key="friend.id">
                     <input type="text" class="form-control" 
                     :value="friend.username" readonly
                     aria-label="Recipient's username" aria-describedby="button-addon2">
                     <button class="btn btn-outline-secondary" 
                     @click="sendFriendRequest(friend.id)"
-                    type="button" id="button-addon2" >add</button>
+                    type="button" id="button-addon2" >
+                      {{ pendingUsers.includes(friend.id) ? 'Pending': 'Add Friend' }}
+                    </button>
                   </div>
                 </form>
             </div>
@@ -102,6 +105,7 @@ const usersCanAddFriends = ref([]);
 const friendReq = ref([]);
 const friends = ref([]);
 const myFriendsName = ref([]);
+const pendingUsers = ref([]);
 const id = ref();
 const error= ref('');
 const csrfToken = ref('') //
@@ -116,7 +120,7 @@ function tabActive(tabName: string){
 
 function filter( ) {
   if(users) {
-      const filteredUsers = users.value.filter(user =>!friends.value.includes(user.id));
+      const filteredUsers = users.value.filter(user =>!friends.value.includes(user.id) && user.id != id.value);
       console.log("users");
       usersCanAddFriends.value = filteredUsers;
 
@@ -130,6 +134,11 @@ function filter( ) {
 
 onMounted(async () => {
     try {
+      const resPendingUsers = await axios.get('/api/getPendingRequests/', {withCredentials: true})
+      pendingUsers.value = resPendingUsers.data.map(x => x.receiver)
+      console.log(resPendingUsers.data);
+      
+      
       const res = await axios.get('/api/get-token/', {withCredentials:true})
       csrfToken.value = res.data.token;
 
@@ -264,6 +273,8 @@ async function sendFriendRequest(receiverID: number){
       },
       withCredentials: true
     })
+
+    addFriendButton.value = 'pending'
   } catch (err) {
     error.value = 'Failed to send friend request';
   }

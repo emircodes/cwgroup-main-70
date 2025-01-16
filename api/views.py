@@ -65,12 +65,20 @@ class ListFriendRequestsView(generics.ListAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        return FriendRequest.objects.filter(Q(receiver=user))
+        return FriendRequest.objects.filter(Q(receiver=user) )
     
     def get_object(self):
         queryset = self.get_queryset()
         obj = generics.get_object_or_404(queryset, self.kwargs.get('pk'))
         return obj
+    
+class ListPendingRequestsView(generics.ListAPIView):
+    serializer_class = FriendSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        return FriendRequest.objects.filter(Q(sender=user) )
     
 class addFriendRequestView(generics.ListCreateAPIView):
     serializer_class = FriendSerializer

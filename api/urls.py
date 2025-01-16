@@ -16,6 +16,7 @@ from .views import (
     ListFriendRequestsView,
     UpdateFriendRequestsView,
     addFriendRequestView,
+    ListPendingRequestsView
 )
 
 spa = login_required(main_spa)
@@ -30,6 +31,7 @@ urlpatterns = [
     path('api/users/', AllUsersView.as_view(), name='all-users'),
     path('similar-users/', similar_users, name='similar-users'),
     path('get-token/', get_csrf_token, name='getToken'),
+    path('api/getPendingRequests/', ListPendingRequestsView.as_view(), name='listPendingRequests'),
     path('api/friend-requests/<int:pk>/', UpdateFriendRequestsView.as_view()),
     path('api/friend-requests/', ListFriendRequestsView.as_view(), name='friend-request'),
     path('api/addFriendRequest/', addFriendRequestView.as_view(), name='addFriendRequest'),
