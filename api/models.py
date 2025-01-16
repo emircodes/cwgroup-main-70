@@ -133,3 +133,4 @@ class Notification(models.Model):
     @staticmethod
     def mark_all_as_read(user: "User") -> None:
         user.notifications.filter(is_read=False).update(is_read=True)
+        
