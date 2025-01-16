@@ -210,6 +210,9 @@ async function acceptFriend(value: string, id:number, userSenderID: number){
       })
       console.log(friends.value);
       
+      await fetchUpdatedData();
+      filter();
+      tabActive('home');
 
     } catch (err) {
       error.value = 'Failed to accept friend';
@@ -232,6 +235,11 @@ async function acceptFriend(value: string, id:number, userSenderID: number){
         },
         withCredentials: true
       })
+
+      await fetchUpdatedData();
+      filter();
+      tabActive('home');
+      
     } catch (err) {
       error.value = 'Failed to reject friend';
     }
