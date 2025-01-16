@@ -148,6 +148,18 @@ class AllUsersView(APIView):
     
 class SimilarUsersPagination(PageNumberPagination):
     page_size = 10
+    page_size_query_param = 'page_size'  # Allow clients to override page size
+    max_page_size = 50  # Maximum allowed page size
+
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,  # Total number of items
+            'results': data  # Current page data
+        })
 
 @api_view(['GET'])
 def similar_users(request):

@@ -1,37 +1,48 @@
 <template>
-  <div class="user-list">
-    <h2 class="table-heading">Users with Similar Hobbies</h2>
+  <div>
+    <h2>User List</h2>
+
+    <!-- Age Range Dropdown -->
     <div class="age-filter">
-    <label>
-      Select Age Range:
-      <select v-model="selectedAgeRange" @change="filterUsersByAge">
+      <label for="ageRange">Select Age Range:</label>
+      <select v-model="selectedAgeRange" id="ageRange">
         <option v-for="range in ageRanges" :key="range.label" :value="range">
           {{ range.label }}
         </option>
       </select>
-    </label>
-  </div>
+    </div>
+
+    <!-- User Table -->
     <table>
       <thead>
         <tr>
           <th>Username</th>
           <th>Email</th>
           <th>Name</th>
-          <th>Similarity</th>
           <th>Age</th>
+          <th>Similarity Score</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="user in users" :key="user.id">
-         
           <td>{{ user.username }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.name }}</td>
-          <td>{{ user.similarity_score }}</td>
           <td>{{ user.calculated_age }}</td>
+          <td>{{ user.similarity_score }}</td>
         </tr>
       </tbody>
     </table>
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+      <button :disabled="!pagination.previous" @click="navigateToPage(pagination.previous)">
+        Previous
+      </button>
+      <button :disabled="!pagination.next" @click="navigateToPage(pagination.next)">
+        Next
+      </button>
+    </div>
   </div>
 </template>
 
@@ -48,12 +59,13 @@ interface User {
   similarity_score: number;
 }
 
-
 interface AgeRange {
   label: string;
   min: number;
   max: number;
 }
+
+// Define predefined age ranges
 const ageRanges = ref<AgeRange[]>([
   { label: '7-18', min: 7, max: 18 },
   { label: '19-25', min: 19, max: 25 },
@@ -64,28 +76,49 @@ const ageRanges = ref<AgeRange[]>([
   { label: '61-70', min: 61, max: 70 },
 ]);
 
-
-const selectedAgeRange = ref<AgeRange>(ageRanges.value[1]); // Default to the first range
-
-
-
 // Pinia store for user data
 const userStore = useUserStore();
+const users = computed<User[]>(() => userStore.similarUsers);
 
-const filterUsersByAge = async () => {
-  const { min, max } = selectedAgeRange.value; // Get the min and max age
-  await userStore.fetchSimilarUsers(min, max);
+// Pagination data
+const pagination = ref({
+  next: null as string | null,
+  previous: null as string | null,
+});
+
+// Fetch users with pagination and filtering support
+const fetchUsers = async (minAge?: number, maxAge?: number, url?: string) => {
+  try {
+    await userStore.fetchSimilarUsers(minAge || 0, maxAge || 100, url);
+    pagination.value.next = userStore.pagination.next;
+    pagination.value.previous = userStore.pagination.previous;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  }
 };
 
-filterUsersByAge();
+// Default age range selection
+const selectedAgeRange = ref<AgeRange>(ageRanges.value[1]); // Default to '19-25'
 
+// Fetch users when the component is mounted
+onMounted(() => {
+  const { min, max } = selectedAgeRange.value;
+  fetchUsers(min, max);
+});
 
+// Watch for changes in the selected age range
+watch(selectedAgeRange, async (newRange) => {
+  const { min, max } = newRange;
+  await fetchUsers(min, max);
+});
 
-// Computed property for the list of users
-const users = computed<User[]>(() => userStore.similarUsers);
+// Navigate pages with pagination
+const navigateToPage = async (url: string | null) => {
+  if (url) {
+    await fetchUsers(undefined, undefined, url);
+  }
+};
 </script>
-
-
 
 <style scoped>
 .user-list {
