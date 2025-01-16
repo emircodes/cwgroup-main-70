@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import User, Hobby, FriendRequest
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import update_session_auth_hash
+from datetime import date
+
 
 class FriendSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,13 +19,33 @@ class HobbySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'name': {'validators': [UniqueValidator(queryset=Hobby.objects.all())]}
         }
-        
-class UserSerializer(serializers.ModelSerializer):
-    similarity_score = serializers.IntegerField(read_only=True) 
+
+# Read Serializer for User (Includes calculated_age and similarity_score)
+class UserReadSerializer(serializers.ModelSerializer):
+    similarity_score = serializers.IntegerField(read_only=True)
+    calculated_age = serializers.SerializerMethodField()  # Dynamically calculate age
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'name', 'password', 'date_of_birth', 'hobbies', 'similarity_score', 'friends')
+        fields = (
+            'id', 'username', 'email', 'name', 'date_of_birth', 'calculated_age', 'hobbies', 'similarity_score'
+        )
+
+    def get_calculated_age(self, obj):
+
+        if obj.date_of_birth:
+            today = date.today()
+            return (
+                today.year - obj.date_of_birth.year -
+                ((today.month, today.day) < (obj.date_of_birth.month, obj.date_of_birth.day))
+            )
+        return None  # Return None if `date_of_birth` is not set
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'name', 'password', 'date_of_birth', 'hobbies', 'friends')
         extra_kwargs = {
             'password': {'write_only': True},
             'username': {'required': False}  
