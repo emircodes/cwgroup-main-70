@@ -28,7 +28,7 @@ class UserReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'username', 'email', 'name', 'date_of_birth', 'calculated_age', 'hobbies', 'similarity_score'
+            'id', 'username', 'email', 'name', 'date_of_birth', 'calculated_age', 'hobbies','friends', 'similarity_score'
         )
 
     def get_calculated_age(self, obj):

@@ -15,7 +15,7 @@ from .serializers import UserSerializer, HobbySerializer, FriendSerializer, User
 import json
 import logging
 from django.middleware.csrf import get_token
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 from datetime import date
 
 
@@ -84,17 +84,9 @@ class UpdateFriendRequestsView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = FriendSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        sent_requests = FriendRequest.objects.filter(sender=request.user)
-        received_requests = FriendRequest.objects.filter(receiver=request.user)
-
-        sent_serializer = FriendSerializer(sent_requests, many=True)
-        received_serializer = FriendSerializer(received_requests, many=True)
-
-        return Response({
-            'sent_requests': sent_serializer.data,
-            'received_requests': received_serializer.data,
-        })
+    def get_queryset(self):
+        user = self.request.user
+        return FriendRequest.objects.filter(Q(sender=user))
     
 #Friends Request Action
 class FriendRequestActionView(APIView):

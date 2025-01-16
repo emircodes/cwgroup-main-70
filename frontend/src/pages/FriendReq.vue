@@ -144,10 +144,10 @@ onMounted(async () => {
       friends.value = responseFriend.data.friends;
 
       console.log(responseFriendReq.data);
-      console.log(responseUsers);
+      console.log(responseFriend.data);
       
       filter();
-      console.log(friendsName.value);
+      console.log(myFriendsName.value);
     } catch (err) {
       error.value = 'Failed to load profile';
     }
