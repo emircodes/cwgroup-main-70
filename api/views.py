@@ -3,18 +3,21 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F, ExpressionWrapper, fields, Case, When
 from rest_framework.decorators import api_view
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from .models import User, Hobby, FriendRequest
-from .serializers import UserSerializer, HobbySerializer, FriendSerializer
+from .serializers import UserSerializer, HobbySerializer, FriendSerializer, UserReadSerializer
 import json
 import logging
 from django.middleware.csrf import get_token
-from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListAPIView
+from datetime import date
+
 
 
 
@@ -53,6 +56,7 @@ def login_view(request):
 # Logout View
 def logout_view(request):
     logout(request)
+    return JsonResponse({'message': 'Logout successful'})
 
 # Friend Request
 class ListFriendRequestsView(generics.ListAPIView):
@@ -79,14 +83,43 @@ class addFriendRequestView(generics.ListCreateAPIView):
 class UpdateFriendRequestsView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = FriendSerializer
     permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        user = self.request.user
-        return FriendRequest.objects.filter(Q(sender=user))
-    
 
+    def get(self, request):
+        sent_requests = FriendRequest.objects.filter(sender=request.user)
+        received_requests = FriendRequest.objects.filter(receiver=request.user)
+
+        sent_serializer = FriendSerializer(sent_requests, many=True)
+        received_serializer = FriendSerializer(received_requests, many=True)
+
+        return Response({
+            'sent_requests': sent_serializer.data,
+            'received_requests': received_serializer.data,
+        })
     
-             
+#Friends Request Action
+class FriendRequestActionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, action):
+        try:
+            friend_request_id = request.data.get('friend_request_id')
+            friend_request = FriendRequest.objects.get(id=friend_request_id)
+
+            if action == 'accept':
+                friend_request.accept()
+            elif action == 'reject':
+                friend_request.reject()
+            elif action == 'cancel':
+                friend_request.cancel()
+            else:
+                return Response({'error': 'Invalid action'}, status=400)
+            
+            return Response({'message': f'Friend request {action}ed succesfully'})
+        except FriendRequest.DoesNotExist:
+            return Response({'error': 'Friend request not found'}, status=404)
+        except Exception as e:
+            logger.error(f"Friend request action error: {e}")
+            return Response({'error': 'An unexpected error occurred'}, status=500)
         
 # Register User View
 class RegisterUserView(generics.CreateAPIView):
@@ -109,8 +142,12 @@ class RegisterUserView(generics.CreateAPIView):
 # User Profile View
 class UserProfileView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method in ['GET']:
+            return UserReadSerializer
+        return UserSerializer
 
     def get_object(self):
         return self.request.user  # Returns the authenticated user
@@ -128,21 +165,61 @@ class AllUsersView(APIView):
 
     def get(self, request):
         users = User.objects.all()  # Fetch all users
-        serializer = UserSerializer(users, many=True)
+        serializer = UserReadSerializer(users, many=True)
         return Response(serializer.data)
     
+class SimilarUsersPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'  # Allow clients to override page size
+    max_page_size = 50  # Maximum allowed page size
+
+    def get_paginated_response(self, data):
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,  # Total number of items
+            'results': data  # Current page data
+        })
+
 @api_view(['GET'])
 def similar_users(request):
-    # Get the hobbies of the current user
     user = request.user
-    user_hobbies = user.hobbies.all()
+    user_hobbies = user.hobbies.values_list('id', flat=True)
+    today = date.today()
 
-    # Get other users and count similar hobbies
-    similar_users = (
-        User.objects.exclude(id=user.id)  # Exclude the current user
-        .annotate(similarity_score=Count('hobbies', filter=Q(hobbies__id__in=user_hobbies)))  # Use Q for filtering
-        .order_by('-similarity_score')  # Order by similarity score
+
+    calculated_age = ExpressionWrapper(
+        today.year - F('date_of_birth__year') -
+        Case(
+            When(
+                Q(date_of_birth__month__gt=today.month) |
+                Q(date_of_birth__month=today.month, date_of_birth__day__gt=today.day),
+                then=1
+            ),
+            default=0,
+            output_field=fields.IntegerField()
+        ),
+        output_field=fields.IntegerField()
     )
 
-    serializer = UserSerializer(similar_users, many=True)
-    return Response(serializer.data)
+
+    min_age = int(request.query_params.get('min_age', 0))
+    max_age = int(request.query_params.get('max_age', 100))
+
+
+    similar_users = (
+        User.objects.exclude(id=user.id)
+        .annotate(
+            similarity_score=Count('hobbies', filter=Q(hobbies__id__in=user_hobbies)),
+            calculated_age=calculated_age
+        )
+        .filter(calculated_age__gte=min_age, calculated_age__lte=max_age)
+        .order_by('-similarity_score')
+    )
+
+    paginator = SimilarUsersPagination()
+    result_page = paginator.paginate_queryset(similar_users,request)
+    serializer = UserReadSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)    

@@ -3,13 +3,6 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from datetime import date
 
 # Create your models here.
-
-
-class PageView(models.Model):
-    count = models.IntegerField(default=0)
-
-    def __str__(self):
-        return f"Page view count: {self.count}"
     
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -54,18 +47,19 @@ class User(AbstractUser):
             )
         return None
     
-    def add_friend(self, user):
+    def add_friend(self, user: "User") -> None:
         self.friends.add(user)
-        
+        user.friends.add(self)
     
-    def remove_friend(self, user):
+    def remove_friend(self, user: "User") -> None:
         self.friends.remove(user)
+        user.friends.remove(self)
         
-    def add_hobby(self):
-        self.hobbies.add(Hobby)
+    def add_hobby(self, hobby: "Hobby") -> None: 
+        self.hobbies.add(hobby)
         
-    def remove_hobby(self):
-        self.hobbies.remove(Hobby)
+    def remove_hobby(self, hobby: "Hobby") -> None:
+        self.hobbies.remove(hobby)
 
 
 class Hobby(models.Model):
@@ -131,3 +125,11 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message[:20]}"
+    
+    def mark_as_read(self) -> None:
+        self.is_read = True
+        self.save()
+
+    @staticmethod
+    def mark_all_as_read(user: "User") -> None:
+        user.notifications.filter(is_read=False).update(is_read=True)
