@@ -1,84 +1,85 @@
 <template>
-    <div class="profile container-fluid row">
-      <h1>My Profile</h1>
-      <form @submit.prevent="updateProfile" novalidate class="col">
-        <!--Name-->
-        <div class="input-group mb-3">
-          <span class="input-group-text" id="basic-addon1">Name</span>
-          <input v-model="name" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
-        </div>
+  <Nav />
+  <div class="profile container-fluid row">
+    <h1>My Profile</h1>
+    <form @submit.prevent="updateProfile" novalidate class="col">
+      <!--Name-->
+      <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">Name</span>
+        <input v-model="name" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+      </div>
 
-        <div class="mb-3">
-          <!--Password-->
-          <div class="row g-3 align-items-center input-group ">
-            <div class="col-auto">
-              <span class="input-group-text" id="basic-addon1">Password</span>
-            </div>
-            <div class="col-auto">
-              <input v-model="password" type="password" id="inputPassword6" class="form-control" :class="outlineCSS" aria-describedby="passwordHelpInline">
-            </div>
+      <div class="mb-3">
+        <!--Password-->
+        <div class="row g-3 align-items-center input-group ">
+          <div class="col-auto">
+            <span class="input-group-text" id="basic-addon1">Password</span>
           </div>
-
-          <!--Validate Password-->
-          <div class="row g-3 align-items-center input-group">
-            <div class="col-auto">
-              <span class="input-group-text" id="basic-addon1">Validate Password</span>
-            </div>
-            <div class="col-auto">
-              <input v-model="validatePassword" @change="validator" type="password" id="inputPassword6" class="form-control " :class="outlineCSS" aria-describedby="passwordHelpInline">
-            </div>
-          
+          <div class="col-auto">
+            <input v-model="password" type="password" id="inputPassword6" class="form-control" :class="outlineCSS" aria-describedby="passwordHelpInline">
           </div>
         </div>
 
-        <!--Email-->
-        <div class="input-group mb-3">
-          <span class="input-group-text" id="basic-addon1">Email</span>
-          <input v-model="email" type="email" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
-        </div>
-
-        <!--Date of Birth-->
-        <div class="input-group mb-3">
-          <span class="input-group-text" id="basic-addon1">Date of Birth</span>
-          <input v-model="date_of_birth" type="date" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
-        </div>
-
-        <!--Save button-->
-        <div class="input-group mb-3">
-          <button class="btn btn-primary m-2" type="submit">Save</button>
-          <button @click="toHome" class="btn btn-primary m-2" type="button">Back to Home</button>
-        </div>
+        <!--Validate Password-->
+        <div class="row g-3 align-items-center input-group">
+          <div class="col-auto">
+            <span class="input-group-text" id="basic-addon1">Validate Password</span>
+          </div>
+          <div class="col-auto">
+            <input v-model="validatePassword" @change="validator" type="password" id="inputPassword6" class="form-control " :class="outlineCSS" aria-describedby="passwordHelpInline">
+          </div>
         
-      </form>
-
-      <div class="col" >
-        <form @submit.prevent="updateHobby">
-          <!--add 1 Hobby-->
-          <div class="input-group mb-3">
-            <button class="btn btn-secondary" type="submit" id="button-addon1">Add Hobby</button>
-            <input v-model="hobby" list='datalistOptions' type="text" class="form-control" placeholder="" aria-label="add hobby text" aria-describedby="button-addon1">
-            <datalist id="datalistOptions">
-              <option v-for="item in selectHobbies" >{{ item.name }}</option>
-            </datalist>
-          </div>
-        </form>
-
-        <div class="card">
-          <h1>My Hobbies</h1>
-
-          <form>
-            <div class="input-group mb-3" v-for=" item in personalHobbiesNameIdentifier">
-              <input type="text" class="form-control" :value='item.name'  readonly >
-              <button @click="extractHobbyToDelete(item.id)" type="submit" class="btn btn-danger">Delete</button>            
-            </div>
-          </form>
-
         </div>
       </div>
 
-      <p v-if="message">{{ message }}</p>
-      <p v-if="error" class="error">{{ error }}</p>
+      <!--Email-->
+      <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">Email</span>
+        <input v-model="email" type="email" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+      </div>
+
+      <!--Date of Birth-->
+      <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">Date of Birth</span>
+        <input v-model="date_of_birth" type="date" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="basic-addon1">
+      </div>
+
+      <!--Save button-->
+      <div class="input-group mb-3">
+        <button class="btn btn-primary m-2" type="submit">Save</button>
+        <button @click="toHome" class="btn btn-primary m-2" type="button">Back to Home</button>
+      </div>
+      
+    </form>
+
+    <div class="col" >
+      <form @submit.prevent="updateHobby">
+        <!--add 1 Hobby-->
+        <div class="input-group mb-3">
+          <button class="btn btn-secondary" type="submit" id="button-addon1">Add Hobby</button>
+          <input v-model="hobby" list='datalistOptions' type="text" class="form-control" placeholder="" aria-label="add hobby text" aria-describedby="button-addon1">
+          <datalist id="datalistOptions">
+            <option v-for="item in selectHobbies" >{{ item.name }}</option>
+          </datalist>
+        </div>
+      </form>
+
+      <div class="card">
+        <h1>My Hobbies</h1>
+
+        <form>
+          <div class="input-group mb-3" v-for=" item in personalHobbiesNameIdentifier">
+            <input type="text" class="form-control" :value='item.name'  readonly >
+            <button @click="extractHobbyToDelete(item.id)" type="submit" class="btn btn-danger">Delete</button>            
+          </div>
+        </form>
+
+      </div>
     </div>
+
+    <p v-if="message">{{ message }}</p>
+    <p v-if="error" class="error">{{ error }}</p>
+  </div>
 
     
   </template>
@@ -87,6 +88,7 @@
   import { ref, onMounted, toRaw } from 'vue';
   import axios from 'axios';
   import { useRouter } from 'vue-router';
+import Nav from './Nav.vue';
 
   const outlineCSS = ref<'is-valid'| 'is-invalid'>();
   const name = ref('');

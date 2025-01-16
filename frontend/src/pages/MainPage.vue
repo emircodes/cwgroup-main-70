@@ -1,21 +1,7 @@
 <template>
 
+  <Nav />
 
-  <div class="input-group">
-    <ul class="nav nav-pills">
-      <li class="nav-item">
-        <a class="nav-link active" aria-current="page" @click="goToProfile" >My Profile</a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link" @click="goToFriendRequest">Friends</a>
-      </li>
-    </ul>
-    
-    
-
-  </div>
-  
   <!-- User List -->
   <div class="input-group">
     <UserList />
@@ -26,6 +12,7 @@
 <script setup lang="ts">
     import { useRouter } from "vue-router";
     import UserList from "./UserList.vue"
+import Nav from "./Nav.vue";
 
     const router = useRouter();
 

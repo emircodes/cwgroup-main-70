@@ -1,4 +1,5 @@
 <template>
+  <Nav />
   <div class="d-flex align-items-center justify-content-center h-75 ">
     <div class="card h-75 w-75">
       <div class="card-body ">
@@ -110,6 +111,7 @@
 import axios, { AxiosHeaderValue } from 'axios';
 import { onMounted, onUnmounted, ref, toRaw, watch } from 'vue';
 import { usePersonal } from '../stores/personalAccount';
+import Nav from './Nav.vue';
 
 const activeTab = ref('home');
 const users = ref([]);
@@ -239,7 +241,7 @@ async function acceptFriend(value: string, id:number, userSenderID: number){
       await fetchUpdatedData();
       filter();
       tabActive('home');
-      
+
     } catch (err) {
       error.value = 'Failed to reject friend';
     }
