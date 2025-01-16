@@ -1,6 +1,6 @@
 <template>
   <Nav />
-  <div class="d-flex align-items-center justify-content-center h-75 ">
+  <div class="d-flex justify-content-center h-75 align-items-center">
     <div class="card h-75 w-75">
       <div class="card-body ">
 
