@@ -190,3 +190,7 @@ def similar_users(request):
     return Response(serializer.data)
 
 
+    #paginator = SimilarUsersPagination()
+    #result_page = paginator.paginate_queyset(similar_users,request)
+    #serializer = UserReadSerializer(result_page, many=True)
+    #return paginator.get_paginated_response(serializer.data)    
