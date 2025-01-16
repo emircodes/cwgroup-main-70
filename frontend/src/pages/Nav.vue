@@ -51,7 +51,9 @@
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import axios from 'axios';
+import { useAuth } from '../stores/auth';
 
+const auth = useAuth();
 const router = useRouter();
 const activeNav = ref('');
 const token = ref('');
@@ -83,13 +85,14 @@ async function fetchToken() {
 async function logout() {
     try {
         await fetchToken();
-        
+        router.push('/login');
         await axios.post('/api/logout/',{}, {
             headers: {
                 'X-CSRFToken': token.value
             }
         });
-        router.push('/login');
+        
+        auth.logout();
     } catch (err) {
         console.error(err);
     }
