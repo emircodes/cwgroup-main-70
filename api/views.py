@@ -185,12 +185,7 @@ def similar_users(request):
         .order_by('-similarity_score')
     )
 
-
-    serializer = UserReadSerializer(similar_users, many=True)
-    return Response(serializer.data)
-
-
-    #paginator = SimilarUsersPagination()
-    #result_page = paginator.paginate_queyset(similar_users,request)
-    #serializer = UserReadSerializer(result_page, many=True)
-    #return paginator.get_paginated_response(serializer.data)    
+    paginator = SimilarUsersPagination()
+    result_page = paginator.paginate_queyset(similar_users,request)
+    serializer = UserReadSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)    
