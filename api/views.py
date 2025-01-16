@@ -94,7 +94,12 @@ class UpdateFriendRequestsView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return FriendRequest.objects.filter(Q(sender=user))
+        return FriendRequest.objects.filter(Q(sender=user) | Q(receiver=user))
+    
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = generics.get_object_or_404(queryset, pk=self.kwargs.get('pk'))
+        return obj
     
 #Friends Request Action
 class FriendRequestActionView(APIView):

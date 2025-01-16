@@ -6,7 +6,11 @@
         <!--Nav -->
         <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link" :class="{active: activeTab === 'home'}" @click="tabActive('home')" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" >
+            <button class="nav-link position-relative" :class="{active: activeTab === 'home'}" @click="tabActive('home')" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" >
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ friendReq.length }}
+                <span class="visually-hidden">unread messages</span>
+              </span>
               <i class="pi pi-bell"></i>
             </button>
           </li>
@@ -32,7 +36,9 @@
                   <div  >
                     <div v-for="item in friendReq" :key="item.id" class="input-group">
                       <span class="input-group-text">ID {{ item.id }}</span>
-                      <input type="text" class="form-control" :placeholder="item.sender" aria-label="Recipient's username with two button addons" readonly>
+                      <input type="text" class="form-control" 
+                      :placeholder="usersCanAddFriends.find(x => x.id === item.sender)?.username || 'unknown'" 
+                      aria-label="Recipient's username with two button addons" readonly>
                       <button class="btn btn-success" @click="acceptFriend('accept', item.id, item.sender)" value="accept" type="button">Accept</button>
                       <button class="btn btn-danger" @click="acceptFriend('reject', item.id, item.sender)" value='reject' type="button">Reject</button>
                     </div>
@@ -57,10 +63,10 @@
                     :value="friend.username" readonly
                     aria-label="Recipient's username" aria-describedby="button-addon2">
                     <button class="btn btn-primary" 
-                    :class="{'btn-outline-secondary': pendingUsers.includes(friend.id)}"
+                    :class="{'btn-outline-secondary': pendingUsers.includes(friend.id) || friendReq.some(x=> x.sender === friend.id)}"
                     @click="sendFriendRequest(friend.id)"
-                    type="button" id="button-addon2" :disabled="pendingUsers.includes(friend.id)">
-                      {{ pendingUsers.includes(friend.id) ? 'Pending': 'Add Friend' }}
+                    type="button" id="button-addon2" :disabled="pendingUsers.includes(friend.id) || friendReq.some(x=> x.sender === friend.id)">
+                      {{ (pendingUsers.includes(friend.id) || friendReq.some(x=> x.sender === friend.id)) ? 'Pending': 'Add Friend' }}
                     </button>
                     <button v-if="pendingUsers.includes(friend.id)"
                     class="btn btn-danger" 
@@ -102,7 +108,7 @@
 
 <script setup lang="ts">
 import axios, { AxiosHeaderValue } from 'axios';
-import { onMounted, ref, toRaw, watch } from 'vue';
+import { onMounted, onUnmounted, ref, toRaw, watch } from 'vue';
 import { usePersonal } from '../stores/personalAccount';
 
 const activeTab = ref('home');
@@ -139,15 +145,31 @@ function filter( ) {
   }
 }
 
-onMounted(async () => {
-    try {
-      await fetchUpdatedData();
-      
+onMounted(() => {
+  // Initial fetch on mount
+  fetchUpdatedData().then(() => {
+    filter();
+    console.log(myFriendsName.value);
+  }).catch(err => {
+    error.value = 'Failed to load profile: ' + err.message;
+    console.error(err);
+  });
+
+  // Set interval to fetch updated data every 5 seconds
+  const intervalId = setInterval(() => {
+    fetchUpdatedData().then(() => {
       filter();
       console.log(myFriendsName.value);
-    } catch (err) {
-      error.value = 'Failed to load profile';
-    }
+    }).catch(err => {
+      error.value = 'Failed to fetch updated data: ' + err.message;
+      console.error(err);
+    });
+  }, 5000); // Interval set to 5 seconds
+
+  // Cleanup the interval when the component is unmounted
+  onUnmounted(() => {
+    clearInterval(intervalId);
+  });
 });
 
 async function acceptFriend(value: string, id:number, userSenderID: number){
@@ -229,6 +251,8 @@ async function fetchUpdatedData() {
 
     const responseFriendReq = await axios.get('/api/friend-requests/', { withCredentials: true });
     friendReq.value = responseFriendReq.data
+    console.log(friendReq.value);
+    
 
     const responseUsers = await axios.get('/api/users/', { withCredentials: true});
     users.value = responseUsers.data
