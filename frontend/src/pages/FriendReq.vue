@@ -56,10 +56,17 @@
                     <input type="text" class="form-control" 
                     :value="friend.username" readonly
                     aria-label="Recipient's username" aria-describedby="button-addon2">
-                    <button class="btn btn-outline-secondary" 
+                    <button class="btn btn-primary" 
+                    :class="{'btn-outline-secondary': pendingUsers.includes(friend.id)}"
                     @click="sendFriendRequest(friend.id)"
-                    type="button" id="button-addon2" >
+                    type="button" id="button-addon2" :disabled="pendingUsers.includes(friend.id)">
                       {{ pendingUsers.includes(friend.id) ? 'Pending': 'Add Friend' }}
+                    </button>
+                    <button v-if="pendingUsers.includes(friend.id)"
+                    class="btn btn-danger" 
+                    @click="cancelFriendReq(friend.id)"
+                    type="button" id="button-addon2" >
+                      Cancel
                     </button>
                   </div>
                 </form>
@@ -98,7 +105,6 @@ import axios, { AxiosHeaderValue } from 'axios';
 import { onMounted, ref, toRaw, watch } from 'vue';
 import { usePersonal } from '../stores/personalAccount';
 
-const addFriendButton = ref('Add Friend')
 const activeTab = ref('home');
 const users = ref([]);
 const usersCanAddFriends = ref([]);
@@ -106,12 +112,13 @@ const friendReq = ref([]);
 const friends = ref([]);
 const myFriendsName = ref([]);
 const pendingUsers = ref([]);
+const pendingUsersData = ref([]);
 const id = ref();
 const error= ref('');
 const csrfToken = ref('') //
 
-watch(activeTab, (newTab, oldTab) => {
-  console.log(`Active tab changed from ${oldTab} to ${newTab}`);
+watch(users, async () => {
+  filter();
 });
 
 function tabActive(tabName: string){
@@ -119,7 +126,7 @@ function tabActive(tabName: string){
 }
 
 function filter( ) {
-  if(users) {
+  if(users.value && friends.value && pendingUsers.value) {
       const filteredUsers = users.value.filter(user =>!friends.value.includes(user.id) && user.id != id.value);
       console.log("users");
       usersCanAddFriends.value = filteredUsers;
@@ -134,26 +141,7 @@ function filter( ) {
 
 onMounted(async () => {
     try {
-      const resPendingUsers = await axios.get('/api/getPendingRequests/', {withCredentials: true})
-      pendingUsers.value = resPendingUsers.data.map(x => x.receiver)
-      console.log(resPendingUsers.data);
-      
-      
-      const res = await axios.get('/api/get-token/', {withCredentials:true})
-      csrfToken.value = res.data.token;
-
-      const responseFriendReq = await axios.get('/api/friend-requests/', { withCredentials: true });
-      friendReq.value = responseFriendReq.data
-
-      const responseUsers = await axios.get('/api/users/', { withCredentials: true});
-      users.value = responseUsers.data
-
-      const responseFriend = await axios.get('/api/profile/', {withCredentials: true});
-      id.value = responseFriend.data.id;
-      friends.value = responseFriend.data.friends;
-
-      console.log(responseFriendReq.data);
-      console.log(responseFriend.data);
+      await fetchUpdatedData();
       
       filter();
       console.log(myFriendsName.value);
@@ -175,7 +163,8 @@ async function acceptFriend(value: string, id:number, userSenderID: number){
         withCredentials: true
       })
 
-      friends.value.push(userSenderID)
+      friends.value = [...friends.value, userSenderID]
+
       const raw = toRaw(friends.value)
 
       // update friends list
@@ -229,8 +218,26 @@ async function acceptFriend(value: string, id:number, userSenderID: number){
 
 async function fetchUpdatedData() {
   try {
-    const response = await axios.get('/api/profile/', { withCredentials: true });
-    friends.value = response.data.friends; // Update the local `friends` state
+    const resPendingUsers = await axios.get('/api/getPendingRequests/', {withCredentials: true})
+    pendingUsers.value = resPendingUsers.data.map(x => x.receiver)
+    pendingUsersData.value = resPendingUsers.data;
+    console.log(resPendingUsers.data);
+    
+    
+    const res = await axios.get('/api/get-token/', {withCredentials:true})
+    csrfToken.value = res.data.token;
+
+    const responseFriendReq = await axios.get('/api/friend-requests/', { withCredentials: true });
+    friendReq.value = responseFriendReq.data
+
+    const responseUsers = await axios.get('/api/users/', { withCredentials: true});
+    users.value = responseUsers.data
+
+    const responseFriend = await axios.get('/api/profile/', {withCredentials: true});
+    id.value = responseFriend.data.id;
+    friends.value = responseFriend.data.friends;
+
+
   } catch (err) {
     error.value = 'Failed to fetch updated data';
   }
@@ -274,9 +281,31 @@ async function sendFriendRequest(receiverID: number){
       withCredentials: true
     })
 
-    addFriendButton.value = 'pending'
+    await fetchUpdatedData();
+    filter();
+    tabActive('profile');
   } catch (err) {
     error.value = 'Failed to send friend request';
   }
 }
+
+async function cancelFriendReq(id: number){
+  const x = pendingUsersData.value.find(x => x.receiver === id)
+  id = x.id;
+  try{
+    const res = await axios.delete(`/api/friend-requests/${id}/`, {
+      headers: {
+        'X-CSRFToken': csrfToken.value
+      },
+      withCredentials: true
+    })
+
+    await fetchUpdatedData();
+    filter();
+    tabActive('profile');
+  } catch (err) {
+    error.value = 'Failed to delete friend request';
+  }
+} 
+
 </script>
