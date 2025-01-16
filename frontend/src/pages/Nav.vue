@@ -9,21 +9,28 @@
             <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item" >
-                    <button class="nav-link active" aria-current="page" 
-                    @click="router.push('/')">
+                    <button class="nav-link btn btn-secondary" aria-current="page" 
+                    :class="{'active': activeNav === 'home' }"
+                    @click="goToHome">
                     Home
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link active" aria-current="page" 
-                    @click="router.push('profile')">
+                    <button class="nav-link btn btn-secondary" 
+                    :class="{'active': activeNav === 'profile' }"
+                    @click="goToProfile">
                     My Profile
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" @click="router.push('friends')">Friends</button>
+                    <button class="nav-link btn btn-secondary" 
+                    :class="{'active': activeNav === 'friends' }"
+                    @click="goToFriends">
+                    Friends
+                    </button>
                 </li>
             </ul>
+            
             </div>
         </div>
     </nav>
@@ -31,9 +38,23 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import FriendReq from './FriendReq.vue';
+import { ref } from 'vue';
 
 const router = useRouter();
+const activeNav = ref('');
 
+function goToHome() {
+    router.push('/');
+    activeNav.value = 'home';
+}
 
+function goToFriends() {
+    router.push('friends');
+    activeNav.value = 'friends';
+}
+
+function goToProfile() {
+    router.push('profile');
+    activeNav.value = 'profile';
+}
 </script>
