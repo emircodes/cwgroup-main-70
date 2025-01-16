@@ -128,9 +128,8 @@ class Notification(models.Model):
     
     def mark_as_read(self) -> None:
         self.is_read = True
-        self.dave()
+        self.save()
 
     @staticmethod
     def mark_all_as_read(user: "User") -> None:
         user.notifications.filter(is_read=False).update(is_read=True)
-        
