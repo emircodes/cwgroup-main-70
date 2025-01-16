@@ -1,65 +1,271 @@
 <template>
-    <div v-if="friendReq">
-        <h1 class="rounded-4">Friend Requests</h1>
+  <div class="d-flex align-items-center justify-content-center h-75 ">
+    <div class="card h-75 w-75">
+      <div class="card-body ">
 
-        <form >
-          <div  >
-            <div v-for="item in friendReq.received_requests" :key="item" class="input-group">
-              <input type="text" class="form-control" :placeholder="item.sender" aria-label="Recipient's username with two button addons">
-              <button class="btn btn-success" value="accept" type="button">Accept</button>
-              <button class="btn btn-danger" value='reject' type="button">Reject</button>
-            </div>
-            
-          </div>
-        </form>
-    </div>
-
-    <div>
-      <h1> Add Friend</h1>
-      <form>
-        <ul>
-          <li v-for="friend in addFriends" :key="friend.id">
-            {{ friend.username }}
+        <!--Nav -->
+        <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" :class="{active: activeTab === 'home'}" @click="tabActive('home')" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" >
+              <i class="pi pi-bell"></i>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" :class="{active: activeTab === 'profile'}" @click="tabActive('profile')" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" >
+              <i class="pi pi-user-plus"></i>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" :class="{active: activeTab === 'contact'}" @click="tabActive('contact')" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button" role="tab" aria-controls="contact-tab-pane" >
+              <i class="pi pi-address-book"></i>
+            </button>
           </li>
         </ul>
-      </form>
-    </div>
 
-    <div>
-      <h1>My Friends</h1>
-      <ul v-for="item in friends">
-        <li :key="item">{{ item }}</li>
-      </ul>
+        <!--Tabs-->
+        <div class="tab-content" id="myTabContent">
+
+          <!--Friend Request-->
+          <div class="tab-pane fade" :class="{'show active': activeTab === 'home'}" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+            <div v-if="friendReq.length">
+                <form >
+                  <div  >
+                    <div v-for="item in friendReq" :key="item.id" class="input-group">
+                      <span class="input-group-text">ID {{ item.id }}</span>
+                      <input type="text" class="form-control" :placeholder="item.sender" aria-label="Recipient's username with two button addons" readonly>
+                      <button class="btn btn-success" @click="acceptFriend('accept', item.id, item.sender)" value="accept" type="button">Accept</button>
+                      <button class="btn btn-danger" @click="acceptFriend('reject', item.id, item.sender)" value='reject' type="button">Reject</button>
+                    </div>
+                    
+                  </div>
+                </form>
+            </div>
+
+            <div v-else class="center">
+              <h3 class="center">no friend requests ... </h3>
+            </div>
+          </div>
+
+          <!--Add Friends Tab -->
+          <div class="tab-pane fade" :class="{'show active': activeTab === 'profile'}" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+            <div>
+                <h1> Add Friend</h1>
+                <form>
+                  <div class="input-group mb-3" v-for="friend in usersCanAddFriends":key="friend.id">
+                    <input type="text" class="form-control" 
+                    :value="friend.username" readonly
+                    aria-label="Recipient's username" aria-describedby="button-addon2">
+                    <button class="btn btn-outline-secondary" 
+                    @click="sendFriendRequest(friend.id)"
+                    type="button" id="button-addon2" >add</button>
+                  </div>
+                </form>
+            </div>
+          </div>
+
+          <!--My Friends Tab-->
+          <div class="tab-pane fade" :class="{'show active': activeTab === 'contact'}" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">
+            <div v-if="myFriendsName.length">
+              <h1>My Friends</h1>
+              <form v-for="item in myFriendsName" :key="item">
+                <div class="input-group mb-3" >
+                  <input type="text" class="form-control" 
+                  :value="item.username" readonly
+                  aria-label="Recipient's username" aria-describedby="button-addon2">
+                  <button class="btn btn-outline-secondary" 
+                  @click="removeFriend(item.id)"
+                  type="button" id="button-addon2">Remove Friend</button>
+                </div>
+              </form>
+            </div>
+
+            <div v-else class="center">
+              <h3 class="center">add more friends !!  </h3>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import axios from 'axios';
-import { onMounted, ref } from 'vue';
+import axios, { AxiosHeaderValue } from 'axios';
+import { onMounted, ref, toRaw, watch } from 'vue';
+import { usePersonal } from '../stores/personalAccount';
 
-const addFriends = ref([]);
+const addFriendButton = ref('Add Friend')
+const activeTab = ref('home');
+const users = ref([]);
+const usersCanAddFriends = ref([]);
 const friendReq = ref([]);
 const friends = ref([]);
+const myFriendsName = ref([]);
+const id = ref();
 const error= ref('');
+const csrfToken = ref('') //
+
+watch(activeTab, (newTab, oldTab) => {
+  console.log(`Active tab changed from ${oldTab} to ${newTab}`);
+});
+
+function tabActive(tabName: string){
+  activeTab.value = tabName;
+}
+
+function filter( ) {
+  if(users) {
+      const filteredUsers = users.value.filter(user =>!friends.value.includes(user.id));
+      console.log("users");
+      usersCanAddFriends.value = filteredUsers;
+
+      const  filteredUsersFriendsName = users.value.filter(user =>friends.value.includes(user.id));
+      myFriendsName.value = filteredUsersFriendsName;
+
+      console.log(usersCanAddFriends.value);
+      console.log(friends.value);
+  }
+}
 
 onMounted(async () => {
     try {
-      const responseFriendReq = await axios.get('/api/get-friend-request/', { withCredentials: true });
+      const res = await axios.get('/api/get-token/', {withCredentials:true})
+      csrfToken.value = res.data.token;
+
+      const responseFriendReq = await axios.get('/api/friend-requests/', { withCredentials: true });
       friendReq.value = responseFriendReq.data
 
       const responseUsers = await axios.get('/api/users/', { withCredentials: true});
-      addFriends.value = responseUsers.data
+      users.value = responseUsers.data
 
       const responseFriend = await axios.get('/api/profile/', {withCredentials: true});
+      id.value = responseFriend.data.id;
       friends.value = responseFriend.data.friends;
 
       console.log(responseFriendReq.data);
       console.log(responseUsers);
-      console.log(responseFriend.data.friends);
       
-      
+      filter();
+      console.log(friendsName.value);
     } catch (err) {
       error.value = 'Failed to load profile';
     }
 });
+
+async function acceptFriend(value: string, id:number, userSenderID: number){
+  if (value === 'accept') {
+    try{
+      // patch pending requests to accepted
+      const res = await axios.patch(`/api/friend-requests/${id}/`, {
+        status: 'accepted'
+      }, {
+        headers: {
+          'X-CSRFToken': csrfToken.value
+        },
+        withCredentials: true
+      })
+
+      friends.value.push(userSenderID)
+      const raw = toRaw(friends.value)
+
+      // update friends list
+      const updateFriend = await axios.patch('/api/profile/', {
+        friends: raw
+      }, {
+        headers: {
+          'X-CSRFToken': csrfToken.value
+        },
+        withCredentials: true
+      })
+
+      console.log(raw);
+      
+
+      const removeFriendRequest = await axios.delete(`/api/friend-requests/${id}/`, {
+        headers: {
+          'X-CSRFToken': csrfToken.value
+        },
+        withCredentials: true
+      })
+      console.log(friends.value);
+      
+
+    } catch (err) {
+      error.value = 'Failed to accept friend';
+    }
+
+  } else {
+    try{
+      const res = await axios.patch(`/api/friend-requests/${id}/`, {
+          status:'rejected'
+      }, {
+        headers: {
+          'X-CSRFToken': csrfToken.value
+        },
+        withCredentials: true
+      })
+
+      const removeFriendRequest = await axios.delete(`/api/friend-requests/${id}/`, {
+        headers: {
+          'X-CSRFToken': csrfToken.value
+        },
+        withCredentials: true
+      })
+    } catch (err) {
+      error.value = 'Failed to reject friend';
+    }
+  }
+}
+
+async function fetchUpdatedData() {
+  try {
+    const response = await axios.get('/api/profile/', { withCredentials: true });
+    friends.value = response.data.friends; // Update the local `friends` state
+  } catch (err) {
+    error.value = 'Failed to fetch updated data';
+  }
+}
+
+
+async function removeFriend(index: number){
+  const x = friends.value.indexOf(index);
+  if (x != -1){
+    friends.value.splice(x, 1)
+  }
+  try {
+    const updateFriend = await axios.patch('/api/profile/', {
+      friends: friends.value
+    }, {
+      headers: {
+        'X-CSRFToken': csrfToken.value
+      },
+      withCredentials: true
+    })
+
+    await fetchUpdatedData()
+    filter();
+    tabActive('contact');
+
+  } catch (err) {
+    error.value = 'Failed to remove friend';
+  }
+}
+
+async function sendFriendRequest(receiverID: number){
+  try{
+    await axios.post('/api/addFriendRequest/', {
+      sender: id.value,  // user's id
+      receiver: receiverID,
+      status: 'pending',
+    }, {
+      headers: {
+        'X-CSRFToken': csrfToken.value
+      },
+      withCredentials: true
+    })
+  } catch (err) {
+    error.value = 'Failed to send friend request';
+  }
+}
 </script>

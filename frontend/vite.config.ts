@@ -37,4 +37,5 @@ export default defineConfig(({ mode }) => ({
             '@': path.resolve(__dirname, './src'),  // Allow imports with '@' as alias for src
         },
     },
+
 }));

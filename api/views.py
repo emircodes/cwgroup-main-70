@@ -14,7 +14,7 @@ from .serializers import UserSerializer, HobbySerializer, FriendSerializer
 import json
 import logging
 from django.middleware.csrf import get_token
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 
 
 
@@ -55,21 +55,38 @@ def logout_view(request):
     logout(request)
 
 # Friend Request
-class ListFriendRequestsView(APIView):
+class ListFriendRequestsView(generics.ListAPIView):
+    serializer_class = FriendSerializer
     permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        return FriendRequest.objects.filter(Q(receiver=user))
+    
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = generics.get_object_or_404(queryset, self.kwargs.get('pk'))
+        return obj
+    
+class addFriendRequestView(generics.ListCreateAPIView):
+    serializer_class = FriendSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        return FriendRequest.objects.filter(Q(sender=user) | Q(receiver=user))
+    
+class UpdateFriendRequestsView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = FriendSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        return FriendRequest.objects.filter(Q(sender=user))
+    
 
-    def get(self, request):
-        sent_requests = FriendRequest.objects.filter(sender=request.user)
-        received_requests = FriendRequest.objects.filter(receiver=request.user)
-
-        sent_serializer = FriendSerializer(sent_requests, many=True)
-        received_serializer = FriendSerializer(received_requests, many=True)
-
-        return Response({
-            'sent_requests': sent_serializer.data,
-            'received_requests': received_serializer.data,
-        })
-        
+    
+             
         
 # Register User View
 class RegisterUserView(generics.CreateAPIView):

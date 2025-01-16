@@ -6,8 +6,8 @@ from django.contrib.auth import update_session_auth_hash
 class FriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendRequest
-        fields = ['id', 'sender', 'receiver', 'created_at', 'status']
-        
+        fields = [ 'status', 'sender', 'id', 'receiver']
+
         
         
 class HobbySerializer(serializers.ModelSerializer):
@@ -35,6 +35,11 @@ class UserSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.email = validated_data.get('email', instance.email)
         instance.date_of_birth = validated_data.get('date_of_birth', instance.date_of_birth)
+        
+        friends_data = validated_data.get('friends', None)
+        if friends_data is not None:
+            # Assuming friends is a ManyToMany field, you can update it like this:
+            instance.friends.set(friends_data)  # Update friends by setting new list
         
         # Handle hobbies update (Many-to-Many relationship)
         hobbies_data = validated_data.get('hobbies', None)

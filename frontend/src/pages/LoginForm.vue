@@ -22,6 +22,7 @@ import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useAuth } from '../stores/auth';
+
 const router = useRouter();
 
 const email = ref('');
@@ -42,7 +43,6 @@ async function fetchToken() {
 const login = async () => {
   try {
     await fetchToken()
-    
 
     const response = await axios.post('/api/login/', {
       email: email.value,
