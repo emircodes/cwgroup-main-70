@@ -9,6 +9,7 @@ from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from .models import User, Hobby, FriendRequest
 from .serializers import UserSerializer, HobbySerializer, FriendSerializer, UserReadSerializer
 import json
@@ -53,6 +54,7 @@ def login_view(request):
 # Logout View
 def logout_view(request):
     logout(request)
+    return JsonResponse({'message': 'Logout successful'})
 
 # Friend Request
 class ListFriendRequestsView(APIView):
@@ -94,8 +96,6 @@ class FriendRequestActionView(APIView):
         except Exception as e:
             logger.error(f"Friend request action error: {e}")
             return Response({'error': 'An unexpected error occurred'}, status=500)
-        
-
         
 # Register User View
 class RegisterUserView(generics.CreateAPIView):
@@ -144,6 +144,9 @@ class AllUsersView(APIView):
         serializer = UserReadSerializer(users, many=True)
         return Response(serializer.data)
     
+class SimilarUsersPagination(PageNumberPagination):
+    page_size = 10
+
 @api_view(['GET'])
 def similar_users(request):
     # Get the hobbies of the current user
@@ -156,5 +159,7 @@ def similar_users(request):
         .order_by('-similarity_score')  # Order by similarity score
     )
 
-    serializer = UserReadSerializer(similar_users, many=True)
-    return Response(serializer.data)
+    paginator = SimilarUsersPagination()
+    result_page = paginator.paginate_queyset(similar_users,request)
+    serializer = UserReadSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
