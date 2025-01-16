@@ -47,11 +47,13 @@ class User(AbstractUser):
             )
         return None
     
-    def add_friend(self, user):
+    def add_friend(self, user: "User") -> None:
         self.friends.add(user)
+        user.friends.add(self)
     
-    def remove_friend(self, user):
+    def remove_friend(self, user: "User") -> None:
         self.friends.remove(user)
+        user.friends.remove(self)
         
     def add_hobby(self, hobby: "Hobby") -> None: 
         self.hobbies.add(hobby)
@@ -123,3 +125,4 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message[:20]}"
+    
