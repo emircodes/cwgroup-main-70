@@ -82,7 +82,7 @@
       </div>
     </div>
 
-    <div class="tab-pane fade" 
+    <div class="tab-pane fade " 
     :class="{'show active': activeTab === 'profile'}" 
     id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" 
     tabindex="0">
@@ -98,11 +98,11 @@
           </div>
         </form>
 
-        <div class="card">
+        <div class="card"  >
           <h1>My Hobbies</h1>
 
-          <form>
-            <div class="input-group mb-3" v-for=" item in personalHobbiesNameIdentifier">
+          <form class="overflow-y-auto " style="max-height: 300px;">
+            <div class="input-group mb-3 " v-for=" item in personalHobbiesNameIdentifier">
               <input type="text" class="form-control" :value='item.name'  readonly >
               <button @click="extractHobbyToDelete(item.id)" type="submit" class="btn btn-danger">Delete</button>            
             </div>
