@@ -3,13 +3,6 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from datetime import date
 
 # Create your models here.
-
-
-class PageView(models.Model):
-    count = models.IntegerField(default=0)
-
-    def __str__(self):
-        return f"Page view count: {self.count}"
     
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
