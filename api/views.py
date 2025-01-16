@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F, ExpressionWrapper, fields, Case, When
 from rest_framework.decorators import api_view
 from rest_framework import generics, status
 from rest_framework.views import APIView
@@ -16,6 +16,8 @@ import json
 import logging
 from django.middleware.csrf import get_token
 from rest_framework.generics import ListAPIView
+from datetime import date
+
 
 
 
@@ -149,17 +151,42 @@ class SimilarUsersPagination(PageNumberPagination):
 
 @api_view(['GET'])
 def similar_users(request):
-    # Get the hobbies of the current user
     user = request.user
-    user_hobbies = user.hobbies.values_list('id', flat=True)  # Extract a flat list of hobby IDs
-    # Get other users and count similar hobbies
-    similar_users = (
-        User.objects.exclude(id=user.id)  # Exclude the current user
-        .annotate(similarity_score=Count('hobbies', filter=Q(hobbies__id__in=user_hobbies)))  # Filter by hobby IDs
-        .order_by('-similarity_score')  # Order by similarity score
+    user_hobbies = user.hobbies.values_list('id', flat=True)
+    today = date.today()
+
+
+    calculated_age = ExpressionWrapper(
+        today.year - F('date_of_birth__year') -
+        Case(
+            When(
+                Q(date_of_birth__month__gt=today.month) |
+                Q(date_of_birth__month=today.month, date_of_birth__day__gt=today.day),
+                then=1
+            ),
+            default=0,
+            output_field=fields.IntegerField()
+        ),
+        output_field=fields.IntegerField()
     )
 
-    paginator = SimilarUsersPagination()
-    result_page = paginator.paginate_queyset(similar_users,request)
-    serializer = UserReadSerializer(result_page, many=True)
-    return paginator.get_paginated_response(serializer.data)
+
+    min_age = int(request.query_params.get('min_age', 0))
+    max_age = int(request.query_params.get('max_age', 100))
+
+
+    similar_users = (
+        User.objects.exclude(id=user.id)
+        .annotate(
+            similarity_score=Count('hobbies', filter=Q(hobbies__id__in=user_hobbies)),
+            calculated_age=calculated_age
+        )
+        .filter(calculated_age__gte=min_age, calculated_age__lte=max_age)
+        .order_by('-similarity_score')
+    )
+
+
+    serializer = UserReadSerializer(similar_users, many=True)
+    return Response(serializer.data)
+
+

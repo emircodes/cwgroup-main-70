@@ -6,14 +6,19 @@ export const useUserStore = defineStore('userStore', {
     similarUsers: [] as Array<{ id: number; username: string; email: string; name: string; calculated_age: number; similarity_score: number; }>,
   }),
   actions: {
-    async fetchSimilarUsers() {
+    async fetchSimilarUsers(minAge : number, maxAge : number) {
       try {
-        const response = await axios.get('/api/similar-users/');
-        console.log("API Response in Pinia:", response.data);
+        const response = await axios.get('/api/similar-users/', {
+          params: {
+            min_age: minAge,
+            max_age: maxAge,
+          },
+        });
         this.similarUsers = response.data;
       } catch (error) {
-        console.error("Error fetching similar users:", error);
+        console.error('Failed to fetch similar users:', error);
       }
     },
   },
 });
+
