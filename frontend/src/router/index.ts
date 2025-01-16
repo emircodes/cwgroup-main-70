@@ -23,14 +23,17 @@ const router = createRouter({
     history: createWebHistory(base),
     routes: [
         { 
-            path: '/', name: 'Main Page', component: MainPage, meta: {requiresAuth: true,}
+            path: '/', name: 'Main Page', component: MainPage, 
+            meta: {requiresAuth: true}
         },
         { path: '/other/', name: 'Other Page', component: OtherPage },
         { path: '/login', component: LoginForm },
         { path: '/register', component: RegisterForm },
-        { path: '/profile', component: ProfileView, meta: {requiresAuth: false,}},
-        { path: '/friends', component: FriendReq},
-        { path: '/users', name: 'User List', component: UserList, meta: {requiresAuth: false,}},
+        { path: '/profile', component: ProfileView, 
+            meta: {requiresAuth: true}},
+        { path: '/friends', component: FriendReq, meta: {requiresAuth: true}},
+        { path: '/users', name: 'User List', component: UserList, 
+            meta: {requiresAuth: true}},
 
         // Wildcard route to catch all routes not explicitly defined
         { path: '/:pathMatch(.*)*', redirect: '/' },
@@ -50,7 +53,9 @@ router.beforeEach((to, from, next) => {
             query: { redirect: to.fullPath }
         })
     }
-
+    else if (!auth.isLoggedIn && from.meta.requiresAuth) {
+        next('/login'); // Redirect to login if navigating back to protected pages
+    } 
     else {
         next();
     }
