@@ -11,10 +11,16 @@
         <a class="nav-link" @click="goToFriendRequest">Friends</a>
       </li>
     </ul>
-    <!-- User List -->
-    <UserList />
+    
+    
 
   </div>
+  
+  <!-- User List -->
+  <div class="input-group">
+    <UserList />
+  </div>
+  
 </template>
 
 <script setup lang="ts">

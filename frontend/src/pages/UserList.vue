@@ -67,6 +67,7 @@ interface AgeRange {
 
 // Define predefined age ranges
 const ageRanges = ref<AgeRange[]>([
+  { label: 'Choose', min: 0, max: 99 },
   { label: '7-18', min: 7, max: 18 },
   { label: '19-25', min: 19, max: 25 },
   { label: '26-31', min: 26, max: 31 },
@@ -98,7 +99,7 @@ const fetchUsers = async (minAge?: number, maxAge?: number, url?: string) => {
 };
 
 // Default age range selection
-const selectedAgeRange = ref<AgeRange>(ageRanges.value[1]); // Default to '19-25'
+const selectedAgeRange = ref<AgeRange>(ageRanges.value[0]); // Default to '19-25'
 
 // Fetch users when the component is mounted
 onMounted(() => {
