@@ -69,7 +69,33 @@ class ListFriendRequestsView(APIView):
             'sent_requests': sent_serializer.data,
             'received_requests': received_serializer.data,
         })
+    
+#Friends Request Action
+class FriendRequestActionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, action):
+        try:
+            friend_request_id = request.data.get('friend_request_id')
+            friend_request = FriendRequest.objects.get(id=friend_request_id)
+
+            if action == 'accept':
+                friend_request.accept()
+            elif action == 'reject':
+                friend_request.reject()
+            elif action == 'cancel':
+                friend_request.cancel()
+            else:
+                return Response({'error': 'Invalid action'}, status=400)
+            
+            return Response({'message': f'Friend request {action}ed succesfully'})
+        except FriendRequest.DoesNotExist:
+            return Response({'error': 'Friend request not found'}, status=404)
+        except Exception as e:
+            logger.error(f"Friend request action error: {e}")
+            return Response({'error': 'An unexpected error occurred'}, status=500)
         
+
         
 # Register User View
 class RegisterUserView(generics.CreateAPIView):
