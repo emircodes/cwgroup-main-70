@@ -62,7 +62,7 @@
                   <div class="input-group mb-3" 
                   v-for="friend in usersCanAddFriends":key="friend.id">
                     <input type="text" class="form-control" 
-                    :value="friend.username" readonly
+                    :value="friend.name" readonly
                     aria-label="Recipient's username" aria-describedby="button-addon2">
                     <button class="btn btn-primary" 
                     :class="{'btn-outline-secondary': pendingUsers.includes(friend.id) || friendReq.some(x=> x.sender === friend.id)}"
