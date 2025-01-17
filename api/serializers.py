@@ -3,38 +3,38 @@ from .models import User, Hobby, FriendRequest
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import update_session_auth_hash
 from datetime import date
+from typing import Any, Dict, Optional, Type
 
 
 class FriendSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FriendRequest
-        fields = [ 'status', 'sender', 'id', 'receiver']
+        model: Type[FriendRequest] = FriendRequest
+        fields: list[str] = [ 'status', 'sender', 'id', 'receiver']
 
-        
-        
+            
 class HobbySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Hobby
-        fields = ['id', 'name']
-        extra_kwargs = {
+        model: Type[Hobby] = Hobby
+        fields: list[str] = ['id', 'name']
+        extra_kwargs: dict = {
             'name': {'validators': [UniqueValidator(queryset=Hobby.objects.all())]}
         }
 
 # Read Serializer for User (Includes calculated_age and similarity_score)
 class UserReadSerializer(serializers.ModelSerializer):
-    similarity_score = serializers.IntegerField(read_only=True)
-    calculated_age = serializers.SerializerMethodField()  # Dynamically calculate age
+    similarity_score: serializers.IntegerField = serializers.IntegerField(read_only=True)
+    calculated_age: serializers.SerializerMethodField = serializers.SerializerMethodField()  # Dynamically calculate age
 
     class Meta:
-        model = User
-        fields = (
+        model: Type[User] = User
+        fields: tuple[str, ...] = (
             'id', 'username', 'email', 'name', 'date_of_birth', 'calculated_age', 'hobbies','friends', 'similarity_score'
         )
 
-    def get_calculated_age(self, obj):
+    def get_calculated_age(self, obj:User) -> Optional[int]:
 
         if obj.date_of_birth:
-            today = date.today()
+            today: date = date.today()
             return (
                 today.year - obj.date_of_birth.year -
                 ((today.month, today.day) < (obj.date_of_birth.month, obj.date_of_birth.day))
@@ -44,14 +44,14 @@ class UserReadSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
-        fields = ('id', 'username', 'email', 'name', 'password', 'date_of_birth', 'hobbies', 'friends')
-        extra_kwargs = {
+        model: Type[User] = User
+        fields: tuple[str, ...] = ('id', 'username', 'email', 'name', 'password', 'date_of_birth', 'hobbies', 'friends')
+        extra_kwargs: dict = {
             'password': {'write_only': True},
             'username': {'required': False}  
         }
 
-    def update(self, instance, validated_data):
+    def update(self, instance: User, validated_data: Dict[str,Any]) -> User:
         """Override update method to handle password and other fields."""
         # Update the basic fields
         instance.name = validated_data.get('name', instance.name)
@@ -78,11 +78,10 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
     
      # Use email as username (reference: learnouts.com)
-    def create(self, validated_data):        
+    def create(self, validated_data: Dict[str, Any]) -> User:        
         if not validated_data.get('username'):
             validated_data['username'] = validated_data['email'] 
-        user = User.objects.create_user(**validated_data)
-        
+        user: User = User.objects.create_user(**validated_data)
         return user
     
     
