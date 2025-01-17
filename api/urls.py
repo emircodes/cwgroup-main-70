@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
-from django.urls import include, path
+from typing import List
+from django.urls import include, path, URLPattern, URLResolver
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
 from .views import (
@@ -21,7 +22,7 @@ from .views import (
 
 spa = login_required(main_spa)
 
-urlpatterns = [
+urlpatterns: List[URLPattern | URLResolver] = [
     path('', spa, name='home'),  # Ensures login required for the main SPA
     path('register/', RegisterUserView.as_view(), name='register'),
     path('login/', login_view, name='login'), 
