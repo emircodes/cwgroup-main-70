@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q, F, ExpressionWrapper, fields, Case, When
+from django.db.models import Count, Q, F, ExpressionWrapper, fields, Case, When, QuerySet
 from rest_framework.decorators import api_view
 from rest_framework import generics, status
 from rest_framework.views import APIView
@@ -17,29 +17,30 @@ import logging
 from django.middleware.csrf import get_token
 from rest_framework.generics import ListAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 from datetime import date
+from typing import Any, Dict
 
 
 
 
 logger = logging.getLogger(__name__)
 
-def get_csrf_token(request):
+def get_csrf_token(request) -> JsonResponse:
     token = get_token(request)
     return JsonResponse({'token': token})
 
 # Main SPA View
 @login_required
-def main_spa(request):
+def main_spa(request) -> HttpResponse:
     return render(request, 'templates/api/spa/index.html')
 
 # Login View
 @csrf_protect
-def login_view(request):
+def login_view(request) -> JsonResponse:
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            email = data.get('email')
-            password = data.get('password')
+            data: Dict[str, Any] = json.loads(request.body)
+            email: str = data.get('email')
+            password: str = data.get('password')
 
             user = authenticate(request, email=email, password=password)
 
@@ -54,7 +55,7 @@ def login_view(request):
             return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
 
 # Logout View
-def logout_view(request):
+def logout_view(request) -> JsonResponse:
     logout(request)
     return JsonResponse({'message': 'Logout successful'})
 
@@ -63,11 +64,11 @@ class ListFriendRequestsView(generics.ListAPIView):
     serializer_class = FriendSerializer
     permission_classes = [IsAuthenticated]
     
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         user = self.request.user
         return FriendRequest.objects.filter(Q(receiver=user) )
     
-    def get_object(self):
+    def get_object(self) -> FriendRequest:
         queryset = self.get_queryset()
         obj = generics.get_object_or_404(queryset, self.kwargs.get('pk'))
         return obj
@@ -76,7 +77,7 @@ class ListPendingRequestsView(generics.ListAPIView):
     serializer_class = FriendSerializer
     permission_classes = [IsAuthenticated]
     
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         user = self.request.user
         return FriendRequest.objects.filter(Q(sender=user) )
     
@@ -84,7 +85,7 @@ class addFriendRequestView(generics.ListCreateAPIView):
     serializer_class = FriendSerializer
     permission_classes = [IsAuthenticated]
     
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         user = self.request.user
         return FriendRequest.objects.filter(Q(sender=user) | Q(receiver=user))
     
@@ -92,11 +93,11 @@ class UpdateFriendRequestsView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = FriendSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         user = self.request.user
         return FriendRequest.objects.filter(Q(sender=user) | Q(receiver=user))
     
-    def get_object(self):
+    def get_object(self) -> FriendRequest:
         queryset = self.get_queryset()
         obj = generics.get_object_or_404(queryset, pk=self.kwargs.get('pk'))
         return obj
@@ -105,10 +106,10 @@ class UpdateFriendRequestsView(generics.RetrieveUpdateDestroyAPIView):
 class FriendRequestActionView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, action):
+    def post(self, request: HttpRequest, action: str) -> Response:
         try:
-            friend_request_id = request.data.get('friend_request_id')
-            friend_request = FriendRequest.objects.get(id=friend_request_id)
+            friend_request_id: int = request.data.get('friend_request_id')
+            friend_request: FriendRequest = FriendRequest.objects.get(id=friend_request_id)
 
             if action == 'accept':
                 friend_request.accept()
@@ -190,9 +191,9 @@ class SimilarUsersPagination(PageNumberPagination):
 
 @api_view(['GET'])
 def similar_users(request):
-    user = request.user
-    user_hobbies = user.hobbies.values_list('id', flat=True)
-    today = date.today()
+    user: User = request.user
+    user_hobbies: QuerySet = user.hobbies.values_list('id', flat=True)
+    today: date = date.today()
 
 
     calculated_age = ExpressionWrapper(
@@ -210,11 +211,11 @@ def similar_users(request):
     )
 
 
-    min_age = int(request.query_params.get('min_age', 0))
-    max_age = int(request.query_params.get('max_age', 100))
+    min_age: int = int(request.query_params.get('min_age', 0))
+    max_age: int = int(request.query_params.get('max_age', 100))
 
 
-    similar_users = (
+    similar_users: QuerySet = (
         User.objects.exclude(id=user.id)
         .annotate(
             similarity_score=Count('hobbies', filter=Q(hobbies__id__in=user_hobbies)),
