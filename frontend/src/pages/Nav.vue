@@ -16,7 +16,7 @@
                     Home
                     </button>
                 </li>
-                <li class="nav-item ">
+                <li class="nav-item " id="profile-nav">
                     <button class="nav-link btn btn-secondary " 
                     :class="{'active': activeNav === 'profile' }"
                     @click="goToProfile">
