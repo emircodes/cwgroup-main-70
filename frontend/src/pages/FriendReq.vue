@@ -34,12 +34,12 @@
           <!--Friend Request-->
           <div class="tab-pane fade" :class="{'show active': activeTab === 'home'}" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
             <div v-if="friendReq.length">
-                <form >
+                <form class="overflow-y-scroll" style="max-height: 350px;">
                   <div  >
                     <div v-for="item in friendReq" :key="item.id" class="input-group">
                       <span class="input-group-text">ID {{ item.id }}</span>
                       <input type="text" class="form-control" 
-                      :placeholder="usersCanAddFriends.find(x => x.id === item.sender)?.username || 'unknown'" 
+                      :placeholder="usersCanAddFriends.find(x => x.id === item.sender)?.email || 'unknown'" 
                       aria-label="Recipient's username with two button addons" readonly>
                       <button class="btn btn-success" @click="acceptFriend('accept', item.id, item.sender)" value="accept" type="button">Accept</button>
                       <button class="btn btn-danger" @click="acceptFriend('reject', item.id, item.sender)" value='reject' type="button">Reject</button>
@@ -56,9 +56,9 @@
 
           <!--Add Friends Tab -->
           <div class="tab-pane fade" :class="{'show active': activeTab === 'profile'}" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
-            <div>
+            <div >
                 <h1> Add Friend</h1>
-                <form>
+                <form class="overflow-y-scroll" style="max-height: 350px;">
                   <div class="input-group mb-3" 
                   v-for="friend in usersCanAddFriends":key="friend.id">
                     <input type="text" class="form-control" 
@@ -85,7 +85,7 @@
           <div class="tab-pane fade" :class="{'show active': activeTab === 'contact'}" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">
             <div v-if="myFriendsName.length">
               <h1>My Friends</h1>
-              <form v-for="item in myFriendsName" :key="item">
+              <form v-for="item in myFriendsName" :key="item" class="overflow-y-scroll" style="max-height: 350px;">
                 <div class="input-group mb-3" >
                   <input type="text" class="form-control" 
                   :value="item.username" readonly
