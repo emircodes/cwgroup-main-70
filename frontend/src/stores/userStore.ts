@@ -8,21 +8,25 @@ export const useUserStore = defineStore('userStore', {
     },
   }),
   actions: {
-    async fetchSimilarUsers(minAge: number, maxAge: number, url?: string) {
+    async fetchSimilarUsers(minAge: number, maxAge: number, url?: string ) {
       try {
-        const endpoint = url || '/api/similar-users/'; // Default to the main endpoint
+        let endpoint = url || '/api/similar-users/';
+        
         const response = await axios.get(endpoint, {
-          params: url ? {} : { min_age: minAge, max_age: maxAge }, // Only send params for the initial request
+          withCredentials: true,
+          // Only send `min_age` & `max_age` as query params on the *first* call
+          params: url ? {} : { min_age: minAge, max_age: maxAge },
         });
 
         // Update state with the response data
-        this.similarUsers = response.data.results; // Paginated results
-        this.pagination.next = response.data.links.next; // Next page link
-        this.pagination.previous = response.data.links.previous; // Previous page link
-        this.pagination.count = response.data.count; // Total number of users
+        this.similarUsers = response.data.results;       // Paginated results
+        this.pagination.next = response.data.links.next; // Next page link (full URL)
+        this.pagination.previous = response.data.links.previous; // Previous page link (full URL)
+        this.pagination.count = response.data.count;     // Total number of users
       } catch (error) {
         console.error('Failed to fetch similar users:', error);
       }
     },
+    
   },
 });
