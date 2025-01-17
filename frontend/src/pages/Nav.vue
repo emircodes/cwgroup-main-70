@@ -3,9 +3,10 @@
     class="navbar navbar-expand-lg bg-body-tertiary "
     >
         <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
+        
             <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ">
                 <li class="nav-item" >
@@ -53,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import axios from 'axios';
