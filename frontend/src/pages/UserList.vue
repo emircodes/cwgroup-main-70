@@ -119,12 +119,32 @@ watch(selectedAgeRange, async (newRange) => {
   await fetchUsers(min, max);
 });
 
-// Navigate pages with pagination
-const navigateToPage = async (url: string | null) => {
-  if (url) {
-    await fetchUsers(undefined, undefined, url);
+function extractRelativePath(absoluteUrl: string | null): string | null {
+  if (!absoluteUrl) return null;
+
+  try {
+    // Attempt to parse it as an absolute URL
+    const parsed = new URL(absoluteUrl, window.location.origin);
+    // Return just the path + query string (and hash if needed)
+    return parsed.pathname + parsed.search;
+  } catch (error) {
+    // If it's already relative or invalid, just return the original string
+    return absoluteUrl;
   }
+}
+
+const navigateToPage = async (url: string | null) => {
+  if (!url) return;
+
+  // Convert "http://127.0.0.1:8000/api/similar-users/?page=2" 
+  // into "/api/similar-users/?page=2"
+  const relativeUrl = extractRelativePath(url);
+  const { min, max } = selectedAgeRange.value;
+
+  // Now fetch the data with the relative URL so the Vite proxy is used
+  await fetchUsers(min, max, relativeUrl);
 };
+
 </script>
 
 <style scoped>
