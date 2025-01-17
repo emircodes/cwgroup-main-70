@@ -21,18 +21,16 @@
         <table class="mb-2">
           <thead>
             <tr>
-              <th>Username</th>
-              <th>Email</th>
               <th>Name</th>
+              <th>Email</th>
               <th>Age</th>
               <th>Similarity Score</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="user in users" :key="user.id">
-              <td>{{ user.username }}</td>
-              <td>{{ user.email }}</td>
               <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
               <td>{{ user.calculated_age }}</td>
               <td>{{ user.similarity_score }}</td>
             </tr>
