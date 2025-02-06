@@ -31,7 +31,7 @@ def get_csrf_token(request) -> JsonResponse:
 # Main SPA View
 @login_required
 def main_spa(request) -> HttpResponse:
-    return render(request, 'templates/api/spa/index.html')
+    return render(request, 'static/api/spa/index.html')
 
 # Login View
 @csrf_protect
