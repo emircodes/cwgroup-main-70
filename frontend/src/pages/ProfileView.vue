@@ -260,7 +260,7 @@ const deleteHobby = async(item: number) => {
 const updateHobbyToApiHobby = async() => {
   try {
     const csrfToken = getCookie('csrftoken');
-    const res = await axios.post('/api/hobbies/', {
+    await axios.post('/api/hobbies/', {
       name: hobby.value,
     }, {
       headers: {
@@ -309,11 +309,11 @@ const updateHobby = async () => {
     if (repositoryHobbies.value.find((x) => x.name !== hobby.value)){
       const apihobby = await updateHobbyToApiHobby();
 
-      if (!apihobby) {
+      if (apihobby != null) {
         message.value = 'Hobby added successfully';
         await refreshHobbies();
         const apiprofile = await updateHobbyToApiProfile();
-        if (!apiprofile) {
+        if (apiprofile != null) {
           message.value = 'Hobbie updated successfully';
           hobby.value = ''
           await refreshHobbies();

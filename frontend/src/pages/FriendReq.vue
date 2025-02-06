@@ -109,9 +109,8 @@
 </template>
 
 <script setup lang="ts">
-import axios, { AxiosHeaderValue } from 'axios';
+import axios from 'axios';
 import { onMounted, onUnmounted, ref, toRaw, watch } from 'vue';
-import { usePersonal } from '../stores/personalAccount';
 import Nav from './Nav.vue';
 import { useFriendReqData } from '../stores/getFriendReq';
 
@@ -182,7 +181,7 @@ async function acceptFriend(value: string, id:number, userSenderID: number){
   if (value === 'accept') {
     try{
       // patch pending requests to accepted
-      const res = await axios.patch(`/api/friend-requests/${id}/`, {
+      await axios.patch(`/api/friend-requests/${id}/`, {
         status: 'accepted'
       }, {
         headers: {
@@ -196,7 +195,7 @@ async function acceptFriend(value: string, id:number, userSenderID: number){
       const raw = toRaw(friends.value)
 
       // update friends list
-      const updateFriend = await axios.patch('/api/profile/', {
+      await axios.patch('/api/profile/', {
         friends: raw
       }, {
         headers: {
@@ -208,7 +207,7 @@ async function acceptFriend(value: string, id:number, userSenderID: number){
       console.log(raw);
       
 
-      const removeFriendRequest = await axios.delete(`/api/friend-requests/${id}/`, {
+      await axios.delete(`/api/friend-requests/${id}/`, {
         headers: {
           'X-CSRFToken': csrfToken.value
         },
@@ -226,7 +225,7 @@ async function acceptFriend(value: string, id:number, userSenderID: number){
 
   } else {
     try{
-      const res = await axios.patch(`/api/friend-requests/${id}/`, {
+      await axios.patch(`/api/friend-requests/${id}/`, {
           status:'rejected'
       }, {
         headers: {
@@ -235,7 +234,7 @@ async function acceptFriend(value: string, id:number, userSenderID: number){
         withCredentials: true
       })
 
-      const removeFriendRequest = await axios.delete(`/api/friend-requests/${id}/`, {
+      await axios.delete(`/api/friend-requests/${id}/`, {
         headers: {
           'X-CSRFToken': csrfToken.value
         },
@@ -288,7 +287,7 @@ async function removeFriend(index: number){
     friends.value.splice(x, 1)
   }
   try {
-    const updateFriend = await axios.patch('/api/profile/', {
+    await axios.patch('/api/profile/', {
       friends: friends.value
     }, {
       headers: {
@@ -331,7 +330,7 @@ async function cancelFriendReq(id: number){
   const x = pendingUsersData.value.find(x => x.receiver === id)
   id = x.id;
   try{
-    const res = await axios.delete(`/api/friend-requests/${id}/`, {
+    await axios.delete(`/api/friend-requests/${id}/`, {
       headers: {
         'X-CSRFToken': csrfToken.value
       },

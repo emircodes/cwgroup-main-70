@@ -7,11 +7,14 @@ export default defineConfig(({ mode }) => ({
     base: mode === "development"
         ? "http://localhost:5173/"
         : "/static/api/spa/",
-    
+    esbuild: {
+            logLevel: "silent", // Ignore warnings/errors from esbuild
+          },   
     build: {
         emptyOutDir: true,
         outDir: "../api/static/api/spa",  // Output folder for Django to serve
-        assetsDir: "assets",              // Place assets in a subfolder
+        assetsDir: "assets",  
+                   // Place assets in a subfolder
     },
 
     server: {

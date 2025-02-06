@@ -5,7 +5,7 @@ export const usePersonal = defineStore('usePersonal', {
         id: ref(),
     }),
     getters: {
-        getUserID(state){
+        getUserID(){
             return this.id
         }
     },
