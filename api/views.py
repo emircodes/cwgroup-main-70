@@ -54,6 +54,8 @@ def login_view(request) -> JsonResponse:
             logger.error(f"Login error: {e}")
             return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
 
+    return JsonResponse({'error': 'GET method not allowed'}, status=405)
+
 # Logout View
 def logout_view(request) -> JsonResponse:
     logout(request)
